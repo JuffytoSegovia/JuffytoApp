@@ -3,8 +3,12 @@ package com.juffyto.juffyto
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.juffyto.juffyto.navigation.Screen
 import com.juffyto.juffyto.ui.screens.SplashScreen
+import com.juffyto.juffyto.ui.screens.menu.MenuScreen
 import com.juffyto.juffyto.ui.theme.JuffytoTheme
 
 class MainActivity : ComponentActivity() {
@@ -12,17 +16,33 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             JuffytoTheme {
-                var showSplash by remember { mutableStateOf(true) }
+                val navController = rememberNavController()
 
-                if (showSplash) {
-                    SplashScreen(
-                        onSplashFinished = {
-                            showSplash = false
-                        }
-                    )
-                } else {
-                    // Aquí irá la navegación principal del app
-                    // Por ahora solo mostraremos un placeholder
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.Splash.route
+                ) {
+                    composable(Screen.Splash.route) {
+                        SplashScreen(
+                            onSplashFinished = {
+                                navController.navigate(Screen.Menu.route) {
+                                    popUpTo(Screen.Splash.route) { inclusive = true }
+                                }
+                            }
+                        )
+                    }
+
+                    composable(Screen.Menu.route) {
+                        MenuScreen(
+                            onNavigateToChronogram = {
+                                navController.navigate(Screen.Chronogram.route)
+                            }
+                        )
+                    }
+
+                    composable(Screen.Chronogram.route) {
+                        // Aquí implementaremos la pantalla del cronograma después
+                    }
                 }
             }
         }
