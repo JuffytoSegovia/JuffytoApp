@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.juffyto.juffyto.navigation.Screen
 import com.juffyto.juffyto.ui.screens.SplashScreen
+import com.juffyto.juffyto.ui.screens.chronogram.ChronogramScreen
 import com.juffyto.juffyto.ui.screens.menu.MenuScreen
 import com.juffyto.juffyto.ui.theme.JuffytoTheme
 
@@ -41,7 +42,10 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable(Screen.Chronogram.route) {
-                        // Aquí implementaremos la pantalla del cronograma después
+                        ChronogramScreen(
+                            onBackClick = { navController.navigateUp() },
+                            onSettingsClick = { /* Implementaremos después */ }
+                        )
                     }
                 }
             }

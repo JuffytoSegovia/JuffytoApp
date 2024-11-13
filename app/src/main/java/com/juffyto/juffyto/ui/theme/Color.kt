@@ -36,3 +36,14 @@ val Upcoming = Color(0xFF9575CD)     // Morado para "próximo"
 // Colores para bordes y divisores
 val LightDivider = Color(0xFFE0E0E0)
 val DarkDivider = Color(0xFF424242)
+
+// Colores para cards
+val CardLight = Color(0xFFFFFFFF)  // Blanco para modo claro
+val CardDark = Color(0xFF1E1E1E)   // Un poco más claro que el fondo oscuro
+val PhaseCardLight = Color(0xFFF5F7FA)  // Gris muy claro para las fases
+val PhaseCardDark = Color(0xFF2D2D2D)   // Gris oscuro para las fases
+
+// Colores de estado para bordes
+val StatusCompleted = Color(0xFFE57373)  // Rojo suave para fases finalizadas
+val StatusActive = Color(0xFF81C784)     // Verde suave para fase actual
+val StatusUpcoming = Color(0xFFFFB74D)   // Naranja suave para fases próximas
