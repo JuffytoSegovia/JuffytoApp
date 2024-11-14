@@ -177,6 +177,15 @@ class ChronogramViewModel(application: Application) : AndroidViewModel(applicati
     // Lista plana de todas las fases para fácil acceso
     val allPhases = stages.flatMap { it.phases }
 
+    // Función para obtener la etapa actual
+    fun getCurrentStage(): Stage? {
+        return stages.find { stage ->
+            stage.phases.any { phase -> phase.isActive }
+        } ?: stages.find { stage ->
+            stage.phases.any { phase -> !phase.isPast && !phase.isActive }
+        }
+    }
+
     // Obtener las fases activas
     val activePhases = allPhases.filter { it.isActive }
 

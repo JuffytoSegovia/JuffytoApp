@@ -1,9 +1,9 @@
 package com.juffyto.juffyto.ui.screens.chronogram
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
@@ -18,6 +18,8 @@ import com.juffyto.juffyto.ui.screens.chronogram.components.ChronogramViewModel
 import com.juffyto.juffyto.ui.screens.chronogram.components.StageSection
 import com.juffyto.juffyto.ui.screens.chronogram.components.TimerContent
 import com.juffyto.juffyto.ui.theme.Primary
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,7 +28,7 @@ fun ChronogramScreen(
     onBackClick: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(1) }  // Cambiado a 1 para que empiece en Contador
     val tabs = listOf("Cronograma", "Contador")
 
     Scaffold(
@@ -109,19 +111,48 @@ fun ChronogramScreen(
 
 @Composable
 private fun ChronogramContent(viewModel: ChronogramViewModel) {
-    Column(
+    val currentStage = viewModel.getCurrentStage()
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    // Scroll inicial a la etapa actual
+    LaunchedEffect(Unit) {
+        currentStage?.let { stage ->
+            val index = viewModel.stages.indexOf(stage)
+            if (index >= 0) {
+                // Usar coroutineScope para garantizar que el scroll se realice
+                coroutineScope.launch {
+                    // Añadir delay para asegurar que la UI esté lista
+                    delay(100)
+                    listState.animateScrollToItem(
+                        index = index,
+                        // Scroll al inicio de la etapa
+                        scrollOffset = 0
+                    )
+                }
+            }
+        }
+    }
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        state = listState
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
+        item { Spacer(modifier = Modifier.height(8.dp)) }
 
-        viewModel.stages.forEach { stage ->
-            StageSection(stage = stage)
+        items(
+            count = viewModel.stages.size,
+            key = { index -> viewModel.stages[index].title }
+        ) { index ->
+            StageSection(
+                stage = viewModel.stages[index],
+                isCurrentStage = viewModel.stages[index] == currentStage
+            )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        item { Spacer(modifier = Modifier.height(8.dp)) }
     }
 }
