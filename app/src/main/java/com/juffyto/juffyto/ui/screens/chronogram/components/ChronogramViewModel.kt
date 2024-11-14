@@ -3,37 +3,35 @@ package com.juffyto.juffyto.ui.screens.chronogram.components
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.juffyto.juffyto.data.preferences.TestModePreferences
 import com.juffyto.juffyto.ui.screens.chronogram.model.Phase
 import com.juffyto.juffyto.ui.screens.chronogram.model.Stage
 import com.juffyto.juffyto.utils.DateUtils
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class ChronogramViewModel(application: Application) : AndroidViewModel(application) {
     private val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-    private val testModePreferences = TestModePreferences(application)
 
-    // Estado del modo de prueba
-    val testModeEnabled: StateFlow<Boolean> = testModePreferences.testModeEnabled
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
-        )
+    // Cambiamos a un simple StateFlow sin persistencia
+    private val _testModeEnabled = MutableStateFlow(false)
+    val testModeEnabled: StateFlow<Boolean> = _testModeEnabled
 
-    // Función para cambiar el estado del modo de prueba
     fun setTestModeEnabled(enabled: Boolean) {
         viewModelScope.launch {
-            testModePreferences.setTestModeEnabled(enabled)
+            _testModeEnabled.value = enabled
             if (!enabled) {
                 DateUtils.resetToRealTime()
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        DateUtils.resetToRealTime()
+        _testModeEnabled.value = false
     }
 
     val stages = listOf(
@@ -186,13 +184,4 @@ class ChronogramViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    // Obtener las fases activas
-    val activePhases = allPhases.filter { it.isActive }
-
-    // Obtener la próxima fase
-    val nextPhase = allPhases
-        .filter { !it.isPast && !it.isActive }
-        .minByOrNull { phase ->
-            phase.startDate ?: phase.singleDate ?: LocalDate.MAX
-        }
 }
