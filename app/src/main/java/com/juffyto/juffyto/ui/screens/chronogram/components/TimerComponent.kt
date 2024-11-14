@@ -24,12 +24,12 @@ import java.util.Locale
 fun TimerContent(phases: List<Phase>) {
     var timeRemaining by remember { mutableStateOf<List<PhaseTimer>>(emptyList()) }
 
-    // Actualizar el tiempo cada minuto
+    // Actualizar el tiempo cada segundo
     LaunchedEffect(key1 = phases) {
         while (true) {
             val currentTimers = calculateTimers(phases)
             timeRemaining = currentTimers
-            delay(60000) // Actualizar cada minuto
+            delay(1000) // Actualizar cada segundo
         }
     }
 
@@ -90,10 +90,10 @@ fun TimerCard(phaseTimer: PhaseTimer) {
                     .padding(vertical = 24.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                TimeUnit("Meses", phaseTimer.timeRemaining.months)
                 TimeUnit("Días", phaseTimer.timeRemaining.days)
                 TimeUnit("Horas", phaseTimer.timeRemaining.hours)
                 TimeUnit("Min", phaseTimer.timeRemaining.minutes)
+                TimeUnit("Seg", phaseTimer.timeRemaining.seconds)
             }
         }
     }
@@ -126,12 +126,13 @@ private fun calculateTimers(phases: List<Phase>): List<PhaseTimer> {
     // Encontrar fases activas
     phases.filter { it.isActive }.forEach { phase ->
         phase.endDate?.let { endDate ->
+            // Establecer la hora de fin a 23:59:59
             val endDateTime = endDate.atTime(23, 59, 59)
             timers.add(
                 PhaseTimer(
                     phase = phase,
                     isActive = true,
-                    timeRemaining = calculateTimeRemaining(endDateTime),
+                    timeRemaining = calculateTimeRemaining(now, endDateTime),
                     type = PhaseTimer.TimerType.ACTIVE_ENDING
                 )
             )
@@ -142,7 +143,9 @@ private fun calculateTimers(phases: List<Phase>): List<PhaseTimer> {
     if (timers.isEmpty()) {
         phases.filter { !it.isPast && !it.isActive }
             .minByOrNull { phase ->
-                phase.startDate?.atStartOfDay() ?: phase.singleDate?.atStartOfDay() ?: LocalDateTime.MAX
+                phase.startDate?.atStartOfDay() ?:
+                phase.singleDate?.atStartOfDay() ?:
+                LocalDateTime.MAX
             }?.let { nextPhase ->
                 val startDateTime = (nextPhase.startDate ?: nextPhase.singleDate)?.atStartOfDay()
                 startDateTime?.let {
@@ -150,7 +153,7 @@ private fun calculateTimers(phases: List<Phase>): List<PhaseTimer> {
                         PhaseTimer(
                             phase = nextPhase,
                             isActive = false,
-                            timeRemaining = calculateTimeRemaining(it),
+                            timeRemaining = calculateTimeRemaining(now, it),
                             type = PhaseTimer.TimerType.UPCOMING_STARTING
                         )
                     )
