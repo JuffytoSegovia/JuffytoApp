@@ -17,6 +17,7 @@ import com.juffyto.juffyto.ui.screens.chronogram.model.*
 import com.juffyto.juffyto.ui.theme.*
 import com.juffyto.juffyto.utils.DateUtils
 import kotlinx.coroutines.delay
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Locale
 
@@ -30,7 +31,7 @@ fun TimerContent(phases: List<Phase>) {
         while (true) {
             val currentTimers = calculateTimers(phases)
             timeRemaining = currentTimers
-            delay(1000) // Actualizar cada segundo
+            delay(1000)
         }
     }
 
@@ -73,19 +74,24 @@ fun TimerContent(phases: List<Phase>) {
             modifier = Modifier.padding(top = if (showTestControls) 8.dp else 0.dp)
         )
 
-        timeRemaining.filter { it.isActive }.forEach { phaseTimer ->
-            TimerCard(phaseTimer)
-        }
-        if (timeRemaining.none { it.isActive }) {
+        val activePhases = timeRemaining
+            .filter { it.isActive }
+            .sortedBy { it.phase.startDate ?: it.phase.singleDate }
+
+        if (activePhases.isEmpty()) {
             Text(
                 text = "No hay fases en curso actualmente",
                 modifier = Modifier.padding(8.dp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
+        } else {
+            activePhases.forEach { phaseTimer ->
+                TimerCard(phaseTimer)
+            }
         }
 
-        // Próximas fases
+        // Próxima fase
         Text(
             text = "PRÓXIMAS FASES",
             fontSize = 20.sp,
@@ -94,10 +100,13 @@ fun TimerContent(phases: List<Phase>) {
             modifier = Modifier.padding(top = 24.dp)
         )
 
-        timeRemaining.filter { !it.isActive }.forEach { phaseTimer ->
-            TimerCard(phaseTimer)
-        }
-        if (timeRemaining.none { !it.isActive }) {
+        val nextPhase = timeRemaining
+            .filter { !it.isActive }
+            .minByOrNull { it.phase.startDate ?: it.phase.singleDate ?: LocalDate.MAX }
+
+        if (nextPhase != null) {
+            TimerCard(nextPhase)
+        } else {
             Text(
                 text = "No hay fases próximas programadas",
                 modifier = Modifier.padding(8.dp),
@@ -121,7 +130,7 @@ private fun TestControls() {
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)  // Espaciado uniforme entre elementos
         ) {
             Text(
                 text = "Controles de prueba",
@@ -133,50 +142,92 @@ private fun TestControls() {
             // Primera fila de botones
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.spacedBy(12.dp)  // Espaciado uniforme entre botones
             ) {
                 Button(
-                    onClick = { DateUtils.advanceTime(1) }, // 1 minuto
-                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                    onClick = { DateUtils.advanceTime(1) },
+                    modifier = Modifier
+                        .weight(1f)  // Peso igual para cada botón
+                        .height(48.dp),  // Altura fija para todos los botones
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                    shape = RoundedCornerShape(4.dp)
                 ) {
-                    Text("+1 min")
+                    Text(
+                        text = "+1 min",
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
                 Button(
-                    onClick = { DateUtils.advanceTime(60) }, // 1 hora
-                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                    onClick = { DateUtils.advanceTime(60) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                    shape = RoundedCornerShape(4.dp)
                 ) {
-                    Text("+1 hora")
+                    Text(
+                        text = "+1 hora",
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
 
             // Segunda fila de botones
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Button(
-                    onClick = { DateUtils.advanceTime(1440) }, // 1 día
-                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                    onClick = { DateUtils.advanceTime(1440) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                    shape = RoundedCornerShape(4.dp)
                 ) {
-                    Text("+1 día")
+                    Text(
+                        text = "+1 día",
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
                 Button(
-                    onClick = { DateUtils.advanceTime(10080) }, // 1 semana
-                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                    onClick = { DateUtils.advanceTime(10080) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                    shape = RoundedCornerShape(4.dp)
                 ) {
-                    Text("+1 semana")
+                    Text(
+                        text = "+1 semana",
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             // Botón de reset
             Button(
                 onClick = { DateUtils.resetToRealTime() },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Error)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Error),
+                shape = RoundedCornerShape(4.dp)
             ) {
-                Text("Resetear al tiempo actual")
+                Text(
+                    text = "Resetear al cronograma en vivo",
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
