@@ -1,5 +1,6 @@
 package com.juffyto.juffyto.ui.screens.menu
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,8 +17,14 @@ import com.juffyto.juffyto.ui.theme.Primary
 
 @Composable
 fun MenuScreen(
-    onNavigateToChronogram: () -> Unit
+    onNavigateToChronogram: () -> Unit,
+    onBackPressed: () -> Unit
 ) {
+    // Manejar el botón de retroceso
+    BackHandler {
+        onBackPressed()
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -55,7 +62,7 @@ fun MenuScreen(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            // Botón principal - volvemos al diseño rectangular
+            // Botón principal
             Button(
                 onClick = onNavigateToChronogram,
                 modifier = Modifier
@@ -64,7 +71,7 @@ fun MenuScreen(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Primary
                 ),
-                shape = RoundedCornerShape(16.dp) // Mantenemos los bordes actuales
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
                     text = "Cronograma Beca 18 2025",
@@ -72,8 +79,6 @@ fun MenuScreen(
                     fontWeight = FontWeight.Medium
                 )
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

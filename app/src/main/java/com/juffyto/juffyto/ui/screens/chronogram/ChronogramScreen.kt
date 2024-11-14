@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.juffyto.juffyto.ui.screens.chronogram.components.ChronogramViewModel
 import com.juffyto.juffyto.ui.screens.chronogram.components.StageSection
 import com.juffyto.juffyto.ui.screens.chronogram.components.TimerContent
@@ -23,7 +22,7 @@ import com.juffyto.juffyto.ui.theme.Primary
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChronogramScreen(
-    viewModel: ChronogramViewModel = viewModel(),
+    viewModel: ChronogramViewModel,
     onBackClick: () -> Unit,
     onSettingsClick: () -> Unit
 ) {

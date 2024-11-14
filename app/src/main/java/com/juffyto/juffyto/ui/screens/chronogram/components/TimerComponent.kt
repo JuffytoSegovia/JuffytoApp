@@ -13,18 +13,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.juffyto.juffyto.ui.screens.chronogram.model.*
 import com.juffyto.juffyto.ui.theme.*
 import com.juffyto.juffyto.utils.DateUtils
 import kotlinx.coroutines.delay
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Locale
 
 @Composable
-fun TimerContent(phases: List<Phase>) {
+fun TimerContent(
+    phases: List<Phase>,
+    viewModel: ChronogramViewModel = viewModel()
+) {
     var timeRemaining by remember { mutableStateOf<List<PhaseTimer>>(emptyList()) }
-    var showTestControls by remember { mutableStateOf(false) }
+    val testModeEnabled by viewModel.testModeEnabled.collectAsState()
 
     // Actualizar el tiempo cada segundo
     LaunchedEffect(key1 = phases) {
@@ -54,14 +57,16 @@ fun TimerContent(phases: List<Phase>) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Switch(
-                checked = showTestControls,
-                onCheckedChange = { showTestControls = it },
+                checked = testModeEnabled,
+                onCheckedChange = { enabled ->
+                    viewModel.setTestModeEnabled(enabled)
+                },
                 modifier = Modifier.padding(start = 8.dp)
             )
         }
 
         // Controles de prueba
-        if (showTestControls) {
+        if (testModeEnabled) {
             TestControls()
         }
 
@@ -71,7 +76,7 @@ fun TimerContent(phases: List<Phase>) {
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = Primary,
-            modifier = Modifier.padding(top = if (showTestControls) 8.dp else 0.dp)
+            modifier = Modifier.padding(top = if (testModeEnabled) 8.dp else 0.dp)
         )
 
         val activePhases = timeRemaining
@@ -100,9 +105,14 @@ fun TimerContent(phases: List<Phase>) {
             modifier = Modifier.padding(top = 24.dp)
         )
 
+        // Obtener solo la próxima fase más cercana
         val nextPhase = timeRemaining
             .filter { !it.isActive }
-            .minByOrNull { it.phase.startDate ?: it.phase.singleDate ?: LocalDate.MAX }
+            .minByOrNull { timer ->
+                timer.phase.startDate?.atStartOfDay() ?:
+                timer.phase.singleDate?.atStartOfDay() ?:
+                LocalDateTime.MAX
+            }
 
         if (nextPhase != null) {
             TimerCard(nextPhase)

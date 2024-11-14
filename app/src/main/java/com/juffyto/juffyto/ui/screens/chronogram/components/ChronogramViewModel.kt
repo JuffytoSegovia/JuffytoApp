@@ -1,13 +1,40 @@
 package com.juffyto.juffyto.ui.screens.chronogram.components
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.juffyto.juffyto.data.preferences.TestModePreferences
 import com.juffyto.juffyto.ui.screens.chronogram.model.Phase
 import com.juffyto.juffyto.ui.screens.chronogram.model.Stage
+import com.juffyto.juffyto.utils.DateUtils
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class ChronogramViewModel : ViewModel() {
+class ChronogramViewModel(application: Application) : AndroidViewModel(application) {
     private val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    private val testModePreferences = TestModePreferences(application)
+
+    // Estado del modo de prueba
+    val testModeEnabled: StateFlow<Boolean> = testModePreferences.testModeEnabled
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
+    // Función para cambiar el estado del modo de prueba
+    fun setTestModeEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            testModePreferences.setTestModeEnabled(enabled)
+            if (!enabled) {
+                DateUtils.resetToRealTime()
+            }
+        }
+    }
 
     val stages = listOf(
         Stage(
