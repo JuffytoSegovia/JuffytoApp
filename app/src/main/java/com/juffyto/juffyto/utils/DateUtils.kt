@@ -6,31 +6,30 @@ import java.time.ZoneId
 
 object DateUtils {
     private val PERU_ZONE_ID = ZoneId.of("America/Lima")
-
-    // Variable para simular diferentes fechas en pruebas
     private var currentTestDateTime: LocalDateTime? = null
+    private var isTestModeActive = false
 
     fun getCurrentDateTimeInPeru(): LocalDateTime {
-        return currentTestDateTime ?: LocalDateTime.now(PERU_ZONE_ID)
+        return if (isTestModeActive) currentTestDateTime ?: LocalDateTime.now(PERU_ZONE_ID)
+        else LocalDateTime.now(PERU_ZONE_ID)
     }
 
     fun getCurrentDateInPeru(): LocalDate {
         return getCurrentDateTimeInPeru().toLocalDate()
     }
 
-    // Función para pruebas: simular una fecha específica
-    fun setTestDateTime(dateTime: LocalDateTime) {
-        currentTestDateTime = dateTime
-    }
-
-    // Función para pruebas: avanzar el tiempo simulado
     fun advanceTime(minutes: Long) {
         currentTestDateTime = (currentTestDateTime ?: LocalDateTime.now(PERU_ZONE_ID))
             .plusMinutes(minutes)
+        isTestModeActive = true
     }
 
-    // Función para pruebas: resetear al tiempo real
     fun resetToRealTime() {
         currentTestDateTime = null
+        isTestModeActive = false
+    }
+
+    fun ensureRealTimeMode() {
+        resetToRealTime()
     }
 }

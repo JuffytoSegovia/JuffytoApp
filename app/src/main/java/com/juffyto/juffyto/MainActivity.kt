@@ -15,6 +15,7 @@ import com.juffyto.juffyto.ui.screens.chronogram.components.ChronogramViewModel
 import com.juffyto.juffyto.ui.screens.menu.MenuScreen
 import com.juffyto.juffyto.ui.theme.JuffytoTheme
 import com.juffyto.juffyto.data.preferences.TestModePreferences
+import com.juffyto.juffyto.utils.DateUtils
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
@@ -72,6 +73,7 @@ class MainActivity : ComponentActivity() {
         // Resetear el modo de prueba cuando se cierra la app
         runBlocking {
             testModePreferences.setTestModeEnabled(false)
+            DateUtils.ensureRealTimeMode()
         }
     }
 

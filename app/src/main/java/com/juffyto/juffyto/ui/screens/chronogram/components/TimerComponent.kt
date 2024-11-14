@@ -341,29 +341,25 @@ private fun calculateTimers(phases: List<Phase>): List<PhaseTimer> {
         }
     }
 
-    // Encontrar la próxima fase si hay menos de 3 fases activas
-    if (activePhases.size < 3) {
-        phases.filter { !it.isPast && !it.isActive }
-            .sortedBy { phase ->
-                phase.startDate?.atStartOfDay() ?:
-                phase.singleDate?.atStartOfDay() ?:
-                LocalDateTime.MAX
-            }
-            .take(3 - activePhases.size)  // Tomar solo las próximas necesarias
-            .forEach { nextPhase ->
-                val startDateTime = (nextPhase.startDate ?: nextPhase.singleDate)?.atStartOfDay()
-                startDateTime?.let {
-                    timers.add(
-                        PhaseTimer(
-                            phase = nextPhase,
-                            isActive = false,
-                            timeRemaining = calculateTimeRemaining(now, it),
-                            type = PhaseTimer.TimerType.UPCOMING_STARTING
-                        )
+    // Encontrar la próxima fase sin importar cuántas fases activas hay
+    phases.filter { !it.isPast && !it.isActive }
+        .minByOrNull { phase ->
+            phase.startDate?.atStartOfDay() ?:
+            phase.singleDate?.atStartOfDay() ?:
+            LocalDateTime.MAX
+        }?.let { nextPhase ->
+            val startDateTime = (nextPhase.startDate ?: nextPhase.singleDate)?.atStartOfDay()
+            startDateTime?.let {
+                timers.add(
+                    PhaseTimer(
+                        phase = nextPhase,
+                        isActive = false,
+                        timeRemaining = calculateTimeRemaining(now, it),
+                        type = PhaseTimer.TimerType.UPCOMING_STARTING
                     )
-                }
+                )
             }
-    }
+        }
 
     // Ordenar por fecha de inicio/fin
     return timers.sortedBy { timer ->
