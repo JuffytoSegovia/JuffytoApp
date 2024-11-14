@@ -14,16 +14,14 @@ import com.juffyto.juffyto.ui.screens.chronogram.ChronogramScreen
 import com.juffyto.juffyto.ui.screens.chronogram.components.ChronogramViewModel
 import com.juffyto.juffyto.ui.screens.menu.MenuScreen
 import com.juffyto.juffyto.ui.theme.JuffytoTheme
-import com.juffyto.juffyto.data.preferences.TestModePreferences
 import com.juffyto.juffyto.utils.DateUtils
-import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
-    private lateinit var testModePreferences: TestModePreferences
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        testModePreferences = TestModePreferences(this)
+        // Asegurar que empezamos desde cero
+        DateUtils.resetToRealTime()
+
         setContent {
             JuffytoTheme {
                 val navController = rememberNavController()
@@ -68,13 +66,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        // Resetear cuando la app va a background
+        DateUtils.resetToRealTime()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        // Resetear el modo de prueba cuando se cierra la app
-        runBlocking {
-            testModePreferences.setTestModeEnabled(false)
-            DateUtils.ensureRealTimeMode()
-        }
+        // Resetear cuando la app se destruye
+        DateUtils.resetToRealTime()
     }
 
     private fun showExitConfirmationDialog() {
