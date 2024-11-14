@@ -1,4 +1,4 @@
-package com.juffyto.juffyto.ui.screens.chronogram
+package com.juffyto.juffyto.ui.screens.chronogram.components
 
 import androidx.lifecycle.ViewModel
 import com.juffyto.juffyto.ui.screens.chronogram.model.Phase
@@ -147,10 +147,13 @@ class ChronogramViewModel : ViewModel() {
         )
     )
 
+    // Lista plana de todas las fases para fácil acceso
     val allPhases = stages.flatMap { it.phases }
 
+    // Obtener las fases activas
     val activePhases = allPhases.filter { it.isActive }
 
+    // Obtener la próxima fase
     val nextPhase = allPhases
         .filter { !it.isPast && !it.isActive }
         .minByOrNull { phase ->

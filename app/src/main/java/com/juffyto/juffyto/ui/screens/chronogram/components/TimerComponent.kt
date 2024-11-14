@@ -23,6 +23,7 @@ import java.util.Locale
 @Composable
 fun TimerContent(phases: List<Phase>) {
     var timeRemaining by remember { mutableStateOf<List<PhaseTimer>>(emptyList()) }
+    var showTestControls by remember { mutableStateOf(false) }
 
     // Actualizar el tiempo cada segundo
     LaunchedEffect(key1 = phases) {
@@ -40,18 +41,143 @@ fun TimerContent(phases: List<Phase>) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        timeRemaining.forEach { phaseTimer ->
-            TimerCard(phaseTimer)
+        // Opción de prueba
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Modo prueba",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Switch(
+                checked = showTestControls,
+                onCheckedChange = { showTestControls = it },
+                modifier = Modifier.padding(start = 8.dp)
+            )
         }
 
-        if (timeRemaining.isEmpty()) {
+        // Controles de prueba
+        if (showTestControls) {
+            TestControls()
+        }
+
+        // Fases en curso
+        Text(
+            text = "FASES EN CURSO",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Primary,
+            modifier = Modifier.padding(top = if (showTestControls) 8.dp else 0.dp)
+        )
+
+        timeRemaining.filter { it.isActive }.forEach { phaseTimer ->
+            TimerCard(phaseTimer)
+        }
+        if (timeRemaining.none { it.isActive }) {
             Text(
-                text = "No hay fases activas o próximas",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 32.dp),
+                text = "No hay fases en curso actualmente",
+                modifier = Modifier.padding(8.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
+        }
+
+        // Próximas fases
+        Text(
+            text = "PRÓXIMAS FASES",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Primary,
+            modifier = Modifier.padding(top = 24.dp)
+        )
+
+        timeRemaining.filter { !it.isActive }.forEach { phaseTimer ->
+            TimerCard(phaseTimer)
+        }
+        if (timeRemaining.none { !it.isActive }) {
+            Text(
+                text = "No hay fases próximas programadas",
+                modifier = Modifier.padding(8.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun TestControls() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Controles de prueba",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Primary
+            )
+
+            // Primera fila de botones
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = { DateUtils.advanceTime(1) }, // 1 minuto
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                ) {
+                    Text("+1 min")
+                }
+                Button(
+                    onClick = { DateUtils.advanceTime(60) }, // 1 hora
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                ) {
+                    Text("+1 hora")
+                }
+            }
+
+            // Segunda fila de botones
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = { DateUtils.advanceTime(1440) }, // 1 día
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                ) {
+                    Text("+1 día")
+                }
+                Button(
+                    onClick = { DateUtils.advanceTime(10080) }, // 1 semana
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                ) {
+                    Text("+1 semana")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Botón de reset
+            Button(
+                onClick = { DateUtils.resetToRealTime() },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Error)
+            ) {
+                Text("Resetear al tiempo actual")
+            }
         }
     }
 }
@@ -123,30 +249,47 @@ private fun calculateTimers(phases: List<Phase>): List<PhaseTimer> {
     val now = DateUtils.getCurrentDateTimeInPeru()
     val timers = mutableListOf<PhaseTimer>()
 
-    // Encontrar fases activas
-    phases.filter { it.isActive }.forEach { phase ->
-        phase.endDate?.let { endDate ->
-            // Establecer la hora de fin a 23:59:59
-            val endDateTime = endDate.atTime(23, 59, 59)
-            timers.add(
-                PhaseTimer(
-                    phase = phase,
-                    isActive = true,
-                    timeRemaining = calculateTimeRemaining(now, endDateTime),
-                    type = PhaseTimer.TimerType.ACTIVE_ENDING
+    // Encontrar todas las fases activas (pueden ser múltiples)
+    val activePhases = phases.filter { it.isActive }
+    activePhases.forEach { phase ->
+        when {
+            phase.singleDate != null -> {
+                // Para eventos de un solo día
+                val endDateTime = phase.singleDate.atTime(23, 59, 59)
+                timers.add(
+                    PhaseTimer(
+                        phase = phase,
+                        isActive = true,
+                        timeRemaining = calculateTimeRemaining(now, endDateTime),
+                        type = PhaseTimer.TimerType.ACTIVE_ENDING
+                    )
                 )
-            )
+            }
+            phase.endDate != null -> {
+                // Para fases con período
+                val endDateTime = phase.endDate.atTime(23, 59, 59)
+                timers.add(
+                    PhaseTimer(
+                        phase = phase,
+                        isActive = true,
+                        timeRemaining = calculateTimeRemaining(now, endDateTime),
+                        type = PhaseTimer.TimerType.ACTIVE_ENDING
+                    )
+                )
+            }
         }
     }
 
-    // Si no hay fases activas, encontrar la próxima fase
-    if (timers.isEmpty()) {
+    // Encontrar la próxima fase si hay menos de 3 fases activas
+    if (activePhases.size < 3) {
         phases.filter { !it.isPast && !it.isActive }
-            .minByOrNull { phase ->
+            .sortedBy { phase ->
                 phase.startDate?.atStartOfDay() ?:
                 phase.singleDate?.atStartOfDay() ?:
                 LocalDateTime.MAX
-            }?.let { nextPhase ->
+            }
+            .take(3 - activePhases.size)  // Tomar solo las próximas necesarias
+            .forEach { nextPhase ->
                 val startDateTime = (nextPhase.startDate ?: nextPhase.singleDate)?.atStartOfDay()
                 startDateTime?.let {
                     timers.add(
@@ -161,5 +304,14 @@ private fun calculateTimers(phases: List<Phase>): List<PhaseTimer> {
             }
     }
 
-    return timers
+    // Ordenar por fecha de inicio/fin
+    return timers.sortedBy { timer ->
+        if (timer.isActive) {
+            timer.phase.endDate?.atStartOfDay() ?:
+            timer.phase.singleDate?.atStartOfDay()
+        } else {
+            timer.phase.startDate?.atStartOfDay() ?:
+            timer.phase.singleDate?.atStartOfDay()
+        }
+    }
 }
