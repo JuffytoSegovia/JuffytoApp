@@ -13,6 +13,7 @@ import com.juffyto.juffyto.ui.screens.SplashScreen
 import com.juffyto.juffyto.ui.screens.chronogram.ChronogramScreen
 import com.juffyto.juffyto.ui.screens.chronogram.components.ChronogramViewModel
 import com.juffyto.juffyto.ui.screens.menu.MenuScreen
+import com.juffyto.juffyto.ui.screens.settings.SettingsViewModel
 import com.juffyto.juffyto.ui.theme.JuffytoTheme
 import com.juffyto.juffyto.utils.DateUtils
 
@@ -52,13 +53,17 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable(Screen.Chronogram.route) {
-                        val viewModel: ChronogramViewModel = viewModel(
+                        val chronogramViewModel: ChronogramViewModel = viewModel(
+                            factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+                        )
+                        val settingsViewModel: SettingsViewModel = viewModel(
                             factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application)
                         )
                         ChronogramScreen(
-                            viewModel = viewModel,
+                            viewModel = chronogramViewModel,
+                            settingsViewModel = settingsViewModel,
                             onBackClick = { navController.navigateUp() },
-                            onSettingsClick = { /* Implementaremos después */ }
+                            onSettingsClick = { /* Ya no se usa */ }
                         )
                     }
                 }

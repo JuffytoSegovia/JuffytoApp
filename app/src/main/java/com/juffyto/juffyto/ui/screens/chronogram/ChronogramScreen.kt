@@ -14,9 +14,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.juffyto.juffyto.ui.screens.chronogram.components.ChronogramViewModel
 import com.juffyto.juffyto.ui.screens.chronogram.components.StageSection
 import com.juffyto.juffyto.ui.screens.chronogram.components.TimerContent
+import com.juffyto.juffyto.ui.screens.settings.SettingsDialog
+import com.juffyto.juffyto.ui.screens.settings.SettingsViewModel
 import com.juffyto.juffyto.ui.theme.Primary
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -24,10 +27,13 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChronogramScreen(
-    viewModel: ChronogramViewModel,
+    viewModel: ChronogramViewModel, // ChronogramViewModel existente
+    settingsViewModel: SettingsViewModel = viewModel(), // Añadir este ViewModel
     onBackClick: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
+    var showSettings by remember { mutableStateOf(false) }
+    val settings by settingsViewModel.settings.collectAsState()
     var selectedTab by remember { mutableIntStateOf(1) }  // Cambiado a 1 para que empiece en Contador
     val tabs = listOf("Cronograma", "Contador")
 
@@ -51,7 +57,7 @@ fun ChronogramScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onSettingsClick) {
+                    IconButton(onClick = { showSettings = true }) { // Modificar esta acción
                         Icon(
                             Icons.Filled.Settings,
                             contentDescription = "Configuración",
@@ -106,6 +112,17 @@ fun ChronogramScreen(
                 1 -> TimerContent(phases = viewModel.allPhases)
             }
         }
+    }
+
+    if (showSettings) {
+        SettingsDialog(
+            settings = settings,
+            onDismiss = { showSettings = false },
+            onSaveSettings = { newSettings ->
+                settingsViewModel.updateSettings(newSettings)
+                showSettings = false
+            }
+        )
     }
 }
 
