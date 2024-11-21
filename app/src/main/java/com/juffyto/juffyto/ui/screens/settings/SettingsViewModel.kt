@@ -17,7 +17,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = NotificationSettings()
+            initialValue = NotificationSettings(enabled = false) // Estado inicial desactivado
         )
 
     fun updateSettings(settings: NotificationSettings) {

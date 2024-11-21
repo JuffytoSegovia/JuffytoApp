@@ -4,35 +4,107 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.juffyto.juffyto.data.model.NotificationFrequency
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimeSelector(
     selectedTime: String,
     onTimeSelected: (String) -> Unit
 ) {
-    Column {
+    var expanded by remember { mutableStateOf(false) }
+    val timeOptions = remember {
+        listOf(
+            "08:00 AM",
+            "09:00 AM",
+            "10:00 AM",
+            "11:00 AM",
+            "12:00 PM",
+            "01:00 PM",
+            "02:00 PM",
+            "03:00 PM",
+            "04:00 PM",
+            "05:00 PM",
+            "06:00 PM"
+        )
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = "Hora de notificación",
             style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.padding(bottom = 8.dp)
+            fontWeight = FontWeight.Medium
         )
 
-        DropdownMenu(
-            expanded = false, // Implementar lógica de expansión
-            onDismissRequest = { },
-            modifier = Modifier.fillMaxWidth()
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = it }
         ) {
-            listOf("09:00", "12:00", "18:00").forEach { time ->
-                DropdownMenuItem(
-                    text = { Text(time) },
-                    onClick = { onTimeSelected(time) }
+            OutlinedTextField(
+                value = selectedTime,
+                onValueChange = {},
+                readOnly = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .exposedDropdownSize(), // Corregido: usando exposedDropdownSize en lugar de menuAnchor
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                placeholder = {
+                    Text("Selecciona la hora (Hora Perú)")
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                 )
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.exposedDropdownSize()
+            ) {
+                timeOptions.forEach { time ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = time,
+                                fontWeight = if (time == selectedTime) FontWeight.Medium else FontWeight.Normal
+                            )
+                        },
+                        onClick = {
+                            onTimeSelected(time)
+                            expanded = false
+                        },
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                        leadingIcon = if (time == selectedTime) {
+                            {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        } else null,
+                        colors = MenuDefaults.itemColors(
+                            textColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
+                }
             }
         }
     }
@@ -43,11 +115,11 @@ fun FrequencySelector(
     selectedFrequency: NotificationFrequency,
     onFrequencySelected: (NotificationFrequency) -> Unit
 ) {
-    Column {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = "Frecuencia de recordatorios",
             style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.padding(bottom = 8.dp)
+            fontWeight = FontWeight.Medium
         )
 
         NotificationFrequency.entries.forEach { frequency ->
@@ -94,14 +166,11 @@ private fun FrequencyOption(
                         NotificationFrequency.WEEKLY -> "Semanal"
                         NotificationFrequency.IMPORTANT_ONLY -> "Solo fechas importantes"
                     },
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = when (frequency) {
-                        NotificationFrequency.DAILY -> "Notificación diaria del estado actual"
-                        NotificationFrequency.WEEKLY -> "Resumen semanal de próximos eventos"
-                        NotificationFrequency.IMPORTANT_ONLY -> "Solo notifica fechas críticas"
-                    },
+                    text = "Notificaciones " + frequency.getDisplayName(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -109,7 +178,7 @@ private fun FrequencyOption(
             if (selected) {
                 Icon(
                     imageVector = Icons.Default.Check,
-                    contentDescription = "Seleccionado",
+                    contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
