@@ -1,6 +1,5 @@
 package com.juffyto.juffyto.ui.screens.settings
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -90,12 +89,9 @@ fun SettingsDialog(
                             }
                         )
 
-                        AnimatedVisibility(
-                            visible = currentSettings.enabled,
-                            enter = expandVertically() + fadeIn(),
-                            exit = shrinkVertically() + fadeOut()
-                        ) {
+                        if (currentSettings.enabled) {
                             Column(
+                                modifier = Modifier.padding(top = 16.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 TimeSelector(
