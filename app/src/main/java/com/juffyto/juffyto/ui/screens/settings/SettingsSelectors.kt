@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.juffyto.juffyto.ui.screens.settings
 
 import androidx.compose.foundation.layout.*
@@ -22,24 +24,17 @@ fun TimeSelector(
     var expanded by remember { mutableStateOf(false) }
     val timeOptions = remember {
         listOf(
-            "08:00 AM",
-            "09:00 AM",
-            "10:00 AM",
-            "11:00 AM",
-            "12:00 PM",
-            "01:00 PM",
-            "02:00 PM",
-            "03:00 PM",
-            "04:00 PM",
-            "05:00 PM",
-            "06:00 PM"
+            "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM",
+            "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM",
+            "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM",
+            "09:00 PM", "10:00 PM", "11:00 PM", "12:00 AM"
         )
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = "Hora de notificación",
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium
         )
 
@@ -53,10 +48,7 @@ fun TimeSelector(
                 readOnly = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .exposedDropdownSize(), // Corregido: usando exposedDropdownSize en lugar de menuAnchor
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                },
+                    .menuAnchor(),
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Notifications,
@@ -64,33 +56,33 @@ fun TimeSelector(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 },
-                placeholder = {
-                    Text("Selecciona la hora (Hora Perú)")
-                },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                )
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                ),
+                placeholder = {
+                    Text("Selecciona la hora (Hora Perú)")
+                }
             )
 
             ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.exposedDropdownSize()
+                onDismissRequest = { expanded = false }
             ) {
                 timeOptions.forEach { time ->
                     DropdownMenuItem(
                         text = {
                             Text(
                                 text = time,
-                                fontWeight = if (time == selectedTime) FontWeight.Medium else FontWeight.Normal
+                                fontWeight = if (time == selectedTime)
+                                    FontWeight.Medium else FontWeight.Normal
                             )
                         },
                         onClick = {
                             onTimeSelected(time)
                             expanded = false
                         },
-                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                         leadingIcon = if (time == selectedTime) {
                             {
                                 Icon(
@@ -100,9 +92,7 @@ fun TimeSelector(
                                 )
                             }
                         } else null,
-                        colors = MenuDefaults.itemColors(
-                            textColor = MaterialTheme.colorScheme.onSurface
-                        )
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                     )
                 }
             }
