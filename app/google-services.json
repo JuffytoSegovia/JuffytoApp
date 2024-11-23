@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "854944108344",
+    "project_id": "juffytoapp",
+    "storage_bucket": "juffytoapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854944108344:android:555962ec2ec66726b7bbcd",
+        "android_client_info": {
+          "package_name": "com.juffyto.juffyto"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBX0hzQOF6g1BjUP8qCY9dhf7fHrU8FkMs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
