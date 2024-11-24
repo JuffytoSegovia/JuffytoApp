@@ -13,13 +13,4 @@ object NotificationSettingsHelper {
         }
         context.startActivity(intent)
     }
-
-    fun areNotificationsEnabled(context: Context): Boolean {
-        return try {
-            context.getSystemService(android.app.NotificationManager::class.java)
-                .areNotificationsEnabled()
-        } catch (e: Exception) {
-            false
-        }
-    }
 }

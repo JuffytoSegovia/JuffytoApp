@@ -14,10 +14,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
-import com.juffyto.juffyto.data.notifications.NotificationWorker
-import com.juffyto.juffyto.data.notifications.NotificationWorker.Companion.WORK_NAME
 import com.juffyto.juffyto.navigation.Screen
 import com.juffyto.juffyto.ui.screens.SplashScreen
 import com.juffyto.juffyto.ui.screens.chronogram.ChronogramScreen
@@ -27,7 +23,6 @@ import com.juffyto.juffyto.ui.screens.settings.SettingsViewModel
 import com.juffyto.juffyto.ui.theme.JuffytoTheme
 import com.juffyto.juffyto.utils.DateUtils
 import com.juffyto.juffyto.utils.NotificationSettingsHelper
-import java.time.LocalTime
 
 class MainActivity : ComponentActivity() {
 
@@ -35,25 +30,23 @@ class MainActivity : ComponentActivity() {
         private const val POST_NOTIFICATIONS_PERMISSION = "android.permission.POST_NOTIFICATIONS"
     }
 
+    private var shouldCheckPermissions = true
+    private var hasShownDialog = false
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
             Log.d("Permissions", "Notification permission granted")
-            testNotification()
+            showNotificationEnabledConfirmation()
         } else {
             Log.d("Permissions", "Notification permission denied")
-            showSettingsDialog()
+            showNotificationsDisabledDialog()
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            checkNotificationPermission()
-        }
-
         DateUtils.resetToRealTime()
 
         setContent {
@@ -69,6 +62,11 @@ class MainActivity : ComponentActivity() {
                             onSplashFinished = {
                                 navController.navigate(Screen.Menu.route) {
                                     popUpTo(Screen.Splash.route) { inclusive = true }
+                                }
+                                // Verificamos los permisos después del splash
+                                if (shouldCheckPermissions && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    checkNotificationPermission()
+                                    shouldCheckPermissions = false
                                 }
                             }
                         )
@@ -115,62 +113,38 @@ class MainActivity : ComponentActivity() {
                 return
             }
             shouldShowRequestPermissionRationale(POST_NOTIFICATIONS_PERMISSION) -> {
-                showRationaleDialog()
+                if (!hasShownDialog) {
+                    showNotificationsDisabledDialog()
+                }
             }
             else -> {
-                requestPermissionLauncher.launch(POST_NOTIFICATIONS_PERMISSION)
+                if (!hasShownDialog) {
+                    requestPermissionLauncher.launch(POST_NOTIFICATIONS_PERMISSION)
+                }
             }
         }
     }
 
-    private fun showRationaleDialog() {
+    private fun showNotificationEnabledConfirmation() {
         android.app.AlertDialog.Builder(this)
-            .setTitle("Notificaciones importantes")
-            .setMessage("Para mantenerte informado sobre las fechas importantes de Beca 18, necesitamos tu permiso para enviar notificaciones. ¿Deseas habilitarlas?")
-            .setPositiveButton("Sí") { _, _ ->
-                requestPermissionLauncher.launch(POST_NOTIFICATIONS_PERMISSION)
-            }
-            .setNegativeButton("Ahora no", null)
+            .setTitle("Notificaciones activadas")
+            .setMessage("Recibirás notificaciones importantes de Beca 18 acordes a como los configures en la app.")
+            .setPositiveButton("Entendido", null)
             .show()
     }
 
-    private fun showSettingsDialog() {
-        android.app.AlertDialog.Builder(this)
-            .setTitle("Notificaciones desactivadas")
-            .setMessage("Puedes habilitar las notificaciones en cualquier momento desde la configuración de la aplicación")
-            .setPositiveButton("Ir a Configuración") { _, _ ->
-                NotificationSettingsHelper.openNotificationSettings(this)
-            }
-            .setNegativeButton("Más tarde", null)
-            .show()
-    }
-
-    private fun testNotification() {
-        val testTime = LocalTime.now().plusSeconds(10)
-        NotificationWorker.schedule(
-            context = this,
-            title = "Prueba de Notificación",
-            message = "Esta es una notificación de prueba",
-            notificationTime = testTime
-        )
-
-        WorkManager.getInstance(this)
-            .getWorkInfosForUniqueWorkLiveData(WORK_NAME)
-            .observe(this) { workInfoList: List<WorkInfo>? ->
-                workInfoList?.forEach { workInfo ->
-                    Log.d("WorkManagerTest", "Estado del trabajo: ${workInfo.state.name}")
+    private fun showNotificationsDisabledDialog() {
+        if (!hasShownDialog) {
+            android.app.AlertDialog.Builder(this)
+                .setTitle("Notificaciones de Beca 18 desactivadas")
+                .setMessage("Puedes habilitar las notificaciones de Beca 18 en cualquier momento desde la configuración de la aplicación")
+                .setPositiveButton("Ir a Configuración") { _, _ ->
+                    NotificationSettingsHelper.openNotificationSettings(this)
                 }
-            }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        DateUtils.resetToRealTime()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        DateUtils.resetToRealTime()
+                .setNegativeButton("Más tarde", null)
+                .show()
+            hasShownDialog = true
+        }
     }
 
     private fun showExitConfirmationDialog() {
@@ -184,5 +158,15 @@ class MainActivity : ComponentActivity() {
                 dialog.dismiss()
             }
             .show()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        DateUtils.resetToRealTime()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        DateUtils.resetToRealTime()
     }
 }
