@@ -7,7 +7,6 @@ import com.juffyto.juffyto.data.model.NotificationFrequency
 import com.juffyto.juffyto.data.preferences.SettingsPreferences
 import com.juffyto.juffyto.ui.screens.chronogram.components.ChronogramViewModel
 import com.juffyto.juffyto.ui.screens.chronogram.model.Phase
-import com.juffyto.juffyto.ui.screens.chronogram.model.Stage
 import kotlinx.coroutines.flow.first
 import java.time.*
 import java.time.format.DateTimeFormatter
@@ -22,12 +21,6 @@ class NotificationWorker(
     private val notificationHelper = NotificationHelper(context)
     private val settingsPreferences = SettingsPreferences(context)
     private val chronogramViewModel = ChronogramViewModel(context.applicationContext as Application)
-
-    private fun Phase.getStage(): Stage? {
-        return chronogramViewModel.stages.find { stage ->
-            stage.phases.contains(this)
-        }
-    }
 
     private fun Phase.isImportantPhase(): Boolean {
         return when {
@@ -91,9 +84,9 @@ class NotificationWorker(
 
         // Construir el mensaje según la frecuencia y las fases
         val (title, message) = when (settings.notificationFrequency) {
-            NotificationFrequency.DAILY -> createDailyNotification(activePhases, nextPhase)
-            NotificationFrequency.WEEKLY -> createWeeklyNotification(activePhases, nextPhase)
-            NotificationFrequency.IMPORTANT_ONLY -> createImportantNotification(activePhases, nextPhase)
+            NotificationFrequency.DAILY -> createNotification(activePhases, nextPhase)
+            NotificationFrequency.WEEKLY -> createNotification(activePhases, nextPhase)
+            NotificationFrequency.IMPORTANT_ONLY -> createNotification(activePhases, nextPhase, true)
         }
 
         notificationHelper.showNotification(title, message)
@@ -102,13 +95,19 @@ class NotificationWorker(
         return Result.success()
     }
 
-    private fun createDailyNotification(
+    private fun createNotification(
         activePhases: List<Phase>,
-        nextPhase: Phase?
+        nextPhase: Phase?,
+        onlyImportant: Boolean = false
     ): Pair<String, String> {
         return when {
             activePhases.isNotEmpty() -> {
-                val phase = activePhases.first()
+                val phase = if (onlyImportant) {
+                    activePhases.firstOrNull { it.isImportantPhase() }
+                } else {
+                    activePhases.first()
+                } ?: return "Beca 18" to "No hay fases importantes programadas próximamente."
+
                 if (phase.endDate != null) {
                     val daysLeft = ChronoUnit.DAYS.between(LocalDate.now(), phase.endDate)
                     phase.title to getPhaseSpecificMessage(phase, daysLeft)
@@ -117,6 +116,10 @@ class NotificationWorker(
                 }
             }
             nextPhase != null -> {
+                if (onlyImportant && !nextPhase.isImportantPhase()) {
+                    return "Beca 18" to "No hay fechas importantes programadas próximamente."
+                }
+
                 val startDate = nextPhase.startDate ?: nextPhase.singleDate
                 if (startDate != null) {
                     val daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), startDate)
@@ -129,60 +132,7 @@ class NotificationWorker(
         }
     }
 
-    private fun createWeeklyNotification(
-        activePhases: List<Phase>,
-        nextPhase: Phase?
-    ): Pair<String, String> {
-        val messageBuilder = StringBuilder()
-
-        if (activePhases.isNotEmpty()) {
-            messageBuilder.append("Estado actual del proceso:\n")
-            activePhases.forEach { phase ->
-                val stage = phase.getStage()
-                messageBuilder.append("• ${stage?.title ?: ""}:\n  ${phase.title}")
-                if (phase.endDate != null) {
-                    val daysLeft = ChronoUnit.DAYS.between(LocalDate.now(), phase.endDate)
-                    messageBuilder.append("\n  ${getPhaseSpecificMessage(phase, daysLeft)}")
-                }
-                messageBuilder.append("\n\n")
-            }
-        }
-
-        nextPhase?.let { phase ->
-            val startDate = phase.startDate ?: phase.singleDate
-            if (startDate != null) {
-                val daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), startDate)
-                val stage = phase.getStage()
-                messageBuilder.append("Próxima fase:\n• ${stage?.title ?: ""}: ${phase.title}\n")
-                messageBuilder.append("  En $daysUntil días: ${getPhaseSpecificMessage(phase)}")
-            }
-        }
-
-        return "Resumen semanal Beca 18" to
-                if (messageBuilder.isEmpty()) "No hay fases activas ni próximas esta semana."
-                else messageBuilder.toString().trim()
-    }
-
-    private fun createImportantNotification(
-        activePhases: List<Phase>,
-        nextPhase: Phase?
-    ): Pair<String, String> {
-        val phase = activePhases.firstOrNull { it.isImportantPhase() }
-            ?: nextPhase?.takeIf { it.isImportantPhase() }
-
-        return if (phase != null) {
-            val stage = phase.getStage()
-            "${stage?.title ?: "Beca 18"}: ¡Fase importante!" to getPhaseSpecificMessage(phase)
-        } else {
-            "Beca 18" to "No hay fechas importantes programadas próximamente."
-        }
-    }
-
     private fun scheduleNextNotification(timeString: String, frequency: NotificationFrequency) {
-        if (frequency == NotificationFrequency.IMPORTANT_ONLY) {
-            return
-        }
-
         val formatter = DateTimeFormatter.ofPattern("hh:mm a")
         val notificationTime = LocalTime.parse(timeString, formatter)
 
@@ -193,7 +143,7 @@ class NotificationWorker(
                 when (frequency) {
                     NotificationFrequency.DAILY -> if (it.isBefore(now)) it.plusDays(1) else it
                     NotificationFrequency.WEEKLY -> if (it.isBefore(now)) it.plusWeeks(1) else it
-                    else -> it // Este caso nunca ocurrirá debido al return anterior
+                    NotificationFrequency.IMPORTANT_ONLY -> if (it.isBefore(now)) it.plusDays(1) else it
                 }
             }
 
@@ -206,11 +156,7 @@ class NotificationWorker(
                 phase.startDate ?: phase.singleDate ?: LocalDate.MAX
             }
 
-        val (title, message) = when (frequency) {
-            NotificationFrequency.DAILY -> createDailyNotification(activePhases, nextPhase)
-            NotificationFrequency.WEEKLY -> createWeeklyNotification(activePhases, nextPhase)
-            else -> createDailyNotification(activePhases, nextPhase)
-        }
+        val (title, message) = createNotification(activePhases, nextPhase, frequency == NotificationFrequency.IMPORTANT_ONLY)
 
         val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
             .setInitialDelay(delay.toMillis(), TimeUnit.MILLISECONDS)

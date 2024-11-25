@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package com.juffyto.juffyto.ui.screens.settings
 
 import androidx.compose.foundation.clickable
