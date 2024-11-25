@@ -117,9 +117,9 @@ class ChronogramViewModel(application: Application) : AndroidViewModel(applicati
                 ),
                 Phase(
                     title = "Publicación de Lista de Becarios",
-                    startDate = null,
-                    endDate = null,
-                    singleDate = LocalDate.parse("28/03/2025", formatter)
+                    startDate = LocalDate.parse("28/03/2025", formatter),
+                    endDate = LocalDate.parse("28/04/2025", formatter),  // Un mes después
+                    singleDate = null
                 )
             )
         ),
@@ -164,9 +164,9 @@ class ChronogramViewModel(application: Application) : AndroidViewModel(applicati
                 ),
                 Phase(
                     title = "Publicación de Lista de Becarios",
-                    startDate = null,
-                    endDate = null,
-                    singleDate = LocalDate.parse("30/05/2025", formatter)
+                    startDate = LocalDate.parse("30/05/2025", formatter),
+                    endDate = LocalDate.parse("30/06/2025", formatter),  // Un mes después
+                    singleDate = null
                 )
             )
         )

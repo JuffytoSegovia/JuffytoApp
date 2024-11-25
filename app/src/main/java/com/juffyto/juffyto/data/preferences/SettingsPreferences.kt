@@ -18,8 +18,8 @@ class SettingsPreferences(private val context: Context) {
 
     val settings = context.settingsDataStore.data.map { preferences ->
         NotificationSettings(
-            enabled = preferences[enabled] ?: true,
-            notificationTime = preferences[time] ?: "09:00",
+            enabled = preferences[enabled] == true,  // Aquí está el cambio
+            notificationTime = preferences[time] ?: "Selecciona una hora",
             notificationFrequency = NotificationFrequency.valueOf(
                 preferences[frequency] ?: NotificationFrequency.DAILY.name
             )
