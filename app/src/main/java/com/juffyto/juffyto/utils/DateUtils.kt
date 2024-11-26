@@ -28,8 +28,4 @@ object DateUtils {
         currentTestDateTime = null
         isTestModeActive = false
     }
-
-    fun ensureRealTimeMode() {
-        resetToRealTime()
-    }
 }

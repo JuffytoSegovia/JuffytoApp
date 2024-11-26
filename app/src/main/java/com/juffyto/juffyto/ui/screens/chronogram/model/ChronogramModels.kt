@@ -2,7 +2,6 @@ package com.juffyto.juffyto.ui.screens.chronogram.model
 
 import com.juffyto.juffyto.utils.DateUtils
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 data class Phase(
     val title: String,
@@ -27,17 +26,6 @@ data class Phase(
                 singleDate != null -> singleDate.isBefore(now)
                 endDate != null -> endDate.isBefore(now)
                 else -> false
-            }
-        }
-
-    val displayDate: String
-        get() {
-            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            return when {
-                singleDate != null -> singleDate.format(formatter)
-                startDate != null && endDate != null ->
-                    "${startDate.format(formatter)} - ${endDate.format(formatter)}"
-                else -> ""
             }
         }
 }
