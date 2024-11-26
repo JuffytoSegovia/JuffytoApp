@@ -83,4 +83,7 @@ dependencies {
 
     //AdMod
     implementation(libs.play.services.ads)
+
+    // Fragment
+    implementation(libs.androidx.fragment.ktx)
 }
