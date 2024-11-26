@@ -1,5 +1,6 @@
 package com.juffyto.juffyto.ui.screens.chronogram.components
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -131,11 +132,20 @@ fun TimerContent(
         Spacer(modifier = Modifier.weight(1f))
 
         // Banner al final
-        AdmobBanner(
-            adUnitId = AdMobConstants.getBannerAdUnitId(), // Removemos el parámetro isTestMode
-            adSize = AdMobConstants.AdSizes.FULL_WIDTH,    // Mantenemos el banner más ancho
-            modifier = Modifier.padding(top = 16.dp)
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        ) {
+            val adUnitId = AdMobConstants.getBannerAdUnitId()
+            // Log para verificar qué ID se está usando
+            Log.d("MenuScreen", "Usando AdUnit ID: $adUnitId")
+
+            AdmobBanner(
+                adUnitId = adUnitId,
+                adSize = AdMobConstants.AdSizes.FULL_WIDTH
+            )
+        }
     }
 }
 

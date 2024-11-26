@@ -1,5 +1,6 @@
 package com.juffyto.juffyto.ui.screens.menu
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -84,10 +85,20 @@ fun MenuScreen(
             }
 
             // Banner al final
-            AdmobBanner(
-                adUnitId = AdMobConstants.getBannerAdUnitId(), // Removemos el parámetro isTestMode
-                modifier = Modifier.padding(top = 16.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                val adUnitId = AdMobConstants.getBannerAdUnitId()
+                // Log para verificar qué ID se está usando
+                Log.d("MenuScreen", "Usando AdUnit ID: $adUnitId")
+
+                AdmobBanner(
+                    adUnitId = adUnitId,
+                    adSize = AdMobConstants.AdSizes.FULL_WIDTH
+                )
+            }
         }
     }
 }

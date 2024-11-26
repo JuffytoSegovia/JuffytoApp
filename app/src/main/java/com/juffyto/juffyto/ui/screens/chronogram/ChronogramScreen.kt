@@ -25,6 +25,7 @@ import com.juffyto.juffyto.ui.theme.Primary
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import android.app.Activity
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.platform.LocalContext
 import com.juffyto.juffyto.ui.components.ads.AdmobBanner
@@ -200,10 +201,19 @@ private fun ChronogramContent(viewModel: ChronogramViewModel) {
         }
 
         // Banner al final
-        AdmobBanner(
-            adUnitId = AdMobConstants.getBannerAdUnitId(),
-            adSize = AdMobConstants.AdSizes.FULL_WIDTH,
-            modifier = Modifier.padding(top = 16.dp)
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        ) {
+            val adUnitId = AdMobConstants.getBannerAdUnitId()
+            // Log para verificar qué ID se está usando
+            Log.d("MenuScreen", "Usando AdUnit ID: $adUnitId")
+
+            AdmobBanner(
+                adUnitId = adUnitId,
+                adSize = AdMobConstants.AdSizes.FULL_WIDTH
+            )
+        }
     }
 }
