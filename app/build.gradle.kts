@@ -21,6 +21,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Añade esto dentro del bloque android
+    buildFeatures {
+        buildConfig = true  // Habilita BuildConfig
+        compose = true
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -74,4 +80,7 @@ dependencies {
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
+
+    //AdMod
+    implementation(libs.play.services.ads)
 }

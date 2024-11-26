@@ -14,8 +14,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.juffyto.juffyto.ui.components.ads.AdmobBanner
 import com.juffyto.juffyto.ui.screens.chronogram.model.*
 import com.juffyto.juffyto.ui.theme.*
+import com.juffyto.juffyto.utils.AdMobConstants
 import com.juffyto.juffyto.utils.DateUtils
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
@@ -124,6 +126,16 @@ fun TimerContent(
                 textAlign = TextAlign.Center
             )
         }
+
+        // Espacio flexible para empujar el banner al final
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Banner al final
+        AdmobBanner(
+            adUnitId = AdMobConstants.getBannerAdUnitId(isTestMode = true),
+            adSize = AdMobConstants.AdSizes.FULL_WIDTH, // Banner más ancho
+            modifier = Modifier.padding(top = 16.dp)
+        )
     }
 }
 
