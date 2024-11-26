@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.juffyto.juffyto.navigation.Screen
+import com.juffyto.juffyto.ui.components.ads.InterstitialAdManager
 import com.juffyto.juffyto.ui.screens.SplashScreen
 import com.juffyto.juffyto.ui.screens.chronogram.ChronogramScreen
 import com.juffyto.juffyto.ui.screens.chronogram.components.ChronogramViewModel
@@ -32,6 +33,7 @@ class MainActivity : ComponentActivity() {
 
     private var shouldCheckPermissions = true
     private var hasShownDialog = false
+    private lateinit var interstitialAdManager: InterstitialAdManager
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -47,6 +49,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Inicializar el manager de anuncios intersticiales
+        interstitialAdManager = InterstitialAdManager(this)
         DateUtils.resetToRealTime()
 
         setContent {
@@ -75,10 +79,15 @@ class MainActivity : ComponentActivity() {
                     composable(Screen.Menu.route) {
                         MenuScreen(
                             onNavigateToChronogram = {
+                                // Precargamos un anuncio al entrar al cronograma
+                                interstitialAdManager.loadAd()
                                 navController.navigate(Screen.Chronogram.route)
                             },
                             onBackPressed = {
-                                showExitConfirmationDialog()
+                                // Mostrar anuncio antes de mostrar diálogo de salida
+                                interstitialAdManager.showAd(this@MainActivity) {
+                                    showExitConfirmationDialog()
+                                }
                             }
                         )
                     }
@@ -93,8 +102,16 @@ class MainActivity : ComponentActivity() {
                         ChronogramScreen(
                             viewModel = chronogramViewModel,
                             settingsViewModel = settingsViewModel,
-                            onBackClick = { navController.navigateUp() },
-                            onSettingsClick = { /* Ya no se usa */ }
+                            interstitialAdManager = interstitialAdManager, // Pasar el manager
+                            onBackClick = { shouldShowAd ->
+                                if (shouldShowAd) {
+                                    interstitialAdManager.showAd(this@MainActivity) {
+                                        navController.navigateUp()
+                                    }
+                                } else {
+                                    navController.navigateUp()
+                                }
+                            }
                         )
                     }
                 }
@@ -158,6 +175,12 @@ class MainActivity : ComponentActivity() {
                 dialog.dismiss()
             }
             .show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Precargar anuncio cuando la app vuelve al primer plano
+        interstitialAdManager.loadAd()
     }
 
     override fun onStop() {

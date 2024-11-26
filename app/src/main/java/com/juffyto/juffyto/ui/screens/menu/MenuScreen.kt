@@ -85,7 +85,7 @@ fun MenuScreen(
 
             // Banner al final
             AdmobBanner(
-                adUnitId = AdMobConstants.getBannerAdUnitId(isTestMode = true), // Cambiar a false para producción
+                adUnitId = AdMobConstants.getBannerAdUnitId(), // Removemos el parámetro isTestMode
                 modifier = Modifier.padding(top = 16.dp)
             )
         }

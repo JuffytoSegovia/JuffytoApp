@@ -132,8 +132,8 @@ fun TimerContent(
 
         // Banner al final
         AdmobBanner(
-            adUnitId = AdMobConstants.getBannerAdUnitId(isTestMode = true),
-            adSize = AdMobConstants.AdSizes.FULL_WIDTH, // Banner más ancho
+            adUnitId = AdMobConstants.getBannerAdUnitId(), // Removemos el parámetro isTestMode
+            adSize = AdMobConstants.AdSizes.FULL_WIDTH,    // Mantenemos el banner más ancho
             modifier = Modifier.padding(top = 16.dp)
         )
     }

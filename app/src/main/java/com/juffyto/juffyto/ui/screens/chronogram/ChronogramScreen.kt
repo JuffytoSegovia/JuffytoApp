@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.juffyto.juffyto.ui.components.ads.InterstitialAdManager
 import com.juffyto.juffyto.ui.screens.chronogram.components.ChronogramViewModel
 import com.juffyto.juffyto.ui.screens.chronogram.components.StageSection
 import com.juffyto.juffyto.ui.screens.chronogram.components.TimerContent
@@ -23,32 +24,47 @@ import com.juffyto.juffyto.ui.screens.settings.SettingsViewModel
 import com.juffyto.juffyto.ui.theme.Primary
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import android.app.Activity
+import androidx.activity.compose.BackHandler
+import androidx.compose.ui.platform.LocalContext
+import com.juffyto.juffyto.ui.components.ads.AdmobBanner
+import com.juffyto.juffyto.utils.AdMobConstants
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChronogramScreen(
-    viewModel: ChronogramViewModel, // ChronogramViewModel existente
-    settingsViewModel: SettingsViewModel = viewModel(), // Añadir este ViewModel
-    onBackClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    viewModel: ChronogramViewModel,
+    settingsViewModel: SettingsViewModel = viewModel(),
+    interstitialAdManager: InterstitialAdManager,
+    onBackClick: (Boolean) -> Unit
 ) {
     var showSettings by remember { mutableStateOf(false) }
     val settings by settingsViewModel.settings.collectAsState()
-    var selectedTab by remember { mutableIntStateOf(1) }  // Cambiado a 1 para que empiece en Contador
+    var selectedTab by remember { mutableIntStateOf(1) }
     val tabs = listOf("Cronograma", "Contador")
+    val context = LocalContext.current
+
+    // Manejar el botón de atrás del dispositivo
+    BackHandler {
+        onBackClick(true)
+    }
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar( // Cambiar a CenterAlignedTopAppBar
                 title = {
                     Text(
-                        "Cronograma Beca 18",
+                        text = "Cronograma Beca 18",
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = Color.White,
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(
+                        onClick = {
+                            onBackClick(true)
+                        }
+                    ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar",
@@ -57,7 +73,7 @@ fun ChronogramScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showSettings = true }) { // Modificar esta acción
+                    IconButton(onClick = { showSettings = true }) {
                         Icon(
                             Icons.Filled.Settings,
                             contentDescription = "Configuración",
@@ -65,8 +81,9 @@ fun ChronogramScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Primary
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors( // Usar los colores específicos para CenterAlignedTopAppBar
+                    containerColor = Primary,
+                    titleContentColor = Color.White
                 )
             )
         }
@@ -120,7 +137,13 @@ fun ChronogramScreen(
             onDismiss = { showSettings = false },
             onSaveSettings = { newSettings ->
                 settingsViewModel.updateSettings(newSettings)
-                showSettings = false
+                (context as? Activity)?.let { activity ->
+                    interstitialAdManager.showAd(activity) {
+                        showSettings = false
+                    }
+                } ?: run {
+                    showSettings = false
+                }
             }
         )
     }
@@ -137,13 +160,10 @@ private fun ChronogramContent(viewModel: ChronogramViewModel) {
         currentStage?.let { stage ->
             val index = viewModel.stages.indexOf(stage)
             if (index >= 0) {
-                // Usar coroutineScope para garantizar que el scroll se realice
                 coroutineScope.launch {
-                    // Añadir delay para asegurar que la UI esté lista
                     delay(100)
                     listState.animateScrollToItem(
                         index = index,
-                        // Scroll al inicio de la etapa
                         scrollOffset = 0
                     )
                 }
@@ -151,25 +171,39 @@ private fun ChronogramContent(viewModel: ChronogramViewModel) {
         }
     }
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-        state = listState
+    Column(
+        modifier = Modifier.fillMaxSize()
     ) {
-        item { Spacer(modifier = Modifier.height(8.dp)) }
+        // Contenido del cronograma en un Box con weight para que ocupe el espacio disponible
+        Box(modifier = Modifier.weight(1f)) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                state = listState
+            ) {
+                item { Spacer(modifier = Modifier.height(8.dp)) }
 
-        items(
-            count = viewModel.stages.size,
-            key = { index -> viewModel.stages[index].title }
-        ) { index ->
-            StageSection(
-                stage = viewModel.stages[index],
-                isCurrentStage = viewModel.stages[index] == currentStage
-            )
+                items(
+                    count = viewModel.stages.size,
+                    key = { index -> viewModel.stages[index].title }
+                ) { index ->
+                    StageSection(
+                        stage = viewModel.stages[index],
+                        isCurrentStage = viewModel.stages[index] == currentStage
+                    )
+                }
+
+                item { Spacer(modifier = Modifier.height(8.dp)) }
+            }
         }
 
-        item { Spacer(modifier = Modifier.height(8.dp)) }
+        // Banner al final
+        AdmobBanner(
+            adUnitId = AdMobConstants.getBannerAdUnitId(),
+            adSize = AdMobConstants.AdSizes.FULL_WIDTH,
+            modifier = Modifier.padding(top = 16.dp)
+        )
     }
 }
