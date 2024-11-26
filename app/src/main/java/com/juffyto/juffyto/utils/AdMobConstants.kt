@@ -12,7 +12,7 @@ object AdMobConstants {
     const val TEST_INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
 
     // Para controlar globalmente si estamos en modo prueba o producción
-    private const val IS_TEST_MODE = true  // Cambiar a false para producción
+    private const val IS_TEST_MODE = false  // Cambiar a false para producción (true modo prueba)
 
     // Función para obtener el ID correcto según el ambiente
     fun getBannerAdUnitId(isTestMode: Boolean = IS_TEST_MODE): String {

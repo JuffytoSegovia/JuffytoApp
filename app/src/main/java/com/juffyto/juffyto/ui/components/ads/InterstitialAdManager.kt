@@ -20,7 +20,7 @@ class InterstitialAdManager(private val context: Context) {
     companion object {
         private const val KEY_LAST_AD_SHOWN = "last_ad_shown"
         private const val KEY_IS_FIRST_SESSION = "is_first_session"
-        private const val MIN_INTERVAL_BETWEEN_ADS = 6000L // 2 minutos en milisegundos
+        private const val MIN_INTERVAL_BETWEEN_ADS = 120000L // 2 minutos en milisegundos - 5000 (5s) para modo de prueba
     }
 
     init {
