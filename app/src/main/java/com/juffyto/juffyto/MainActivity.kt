@@ -8,6 +8,10 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -24,6 +28,7 @@ import com.juffyto.juffyto.ui.screens.settings.SettingsViewModel
 import com.juffyto.juffyto.ui.theme.JuffytoTheme
 import com.juffyto.juffyto.utils.DateUtils
 import com.juffyto.juffyto.utils.NotificationSettingsHelper
+import androidx.compose.ui.Modifier
 
 class MainActivity : ComponentActivity() {
 
@@ -83,6 +88,11 @@ class MainActivity : ComponentActivity() {
                                 interstitialAdManager.loadAd()
                                 navController.navigate(Screen.Chronogram.route)
                             },
+                            onNavigateToEnp = {
+                                // Precargamos un anuncio al entrar al ENP
+                                interstitialAdManager.loadAd()
+                                navController.navigate(Screen.Enp.route)
+                            },
                             onBackPressed = {
                                 // Mostrar anuncio antes de mostrar diálogo de salida
                                 interstitialAdManager.showAd(this@MainActivity) {
@@ -113,6 +123,16 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         )
+                    }
+
+                    composable(Screen.Enp.route) {
+                        // Por ahora solo mostraremos un placeholder básico
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Examen Nacional de Preselección")
+                        }
                     }
                 }
             }

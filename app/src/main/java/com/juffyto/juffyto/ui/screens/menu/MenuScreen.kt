@@ -21,6 +21,7 @@ import com.juffyto.juffyto.utils.AdMobConstants
 @Composable
 fun MenuScreen(
     onNavigateToChronogram: () -> Unit,
+    onNavigateToEnp: () -> Unit,
     onBackPressed: () -> Unit
 ) {
     BackHandler {
@@ -43,6 +44,7 @@ fun MenuScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                // Logo y textos
                 Image(
                     painter = painterResource(id = R.drawable.logoapp),
                     contentDescription = "Logo",
@@ -66,21 +68,46 @@ fun MenuScreen(
                     modifier = Modifier.padding(bottom = 32.dp)
                 )
 
-                Button(
-                    onClick = onNavigateToChronogram,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Primary
-                    ),
-                    shape = RoundedCornerShape(16.dp)
+                // Contenedor para los botones
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp) // Espacio uniforme entre botones
                 ) {
-                    Text(
-                        text = "Cronograma Beca 18 2025",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    // Botón Cronograma
+                    Button(
+                        onClick = onNavigateToChronogram,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Primary
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text(
+                            text = "Cronograma Beca 18 2025",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    // Botón ENP
+                    Button(
+                        onClick = onNavigateToEnp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Primary
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text(
+                            text = "Examen Nacional de Preselección",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
 
@@ -91,7 +118,6 @@ fun MenuScreen(
                     .padding(vertical = 8.dp)
             ) {
                 val adUnitId = AdMobConstants.getBannerAdUnitId()
-                // Log para verificar qué ID se está usando
                 Log.d("MenuScreen", "Usando AdUnit ID: $adUnitId")
 
                 AdmobBanner(
