@@ -86,4 +86,7 @@ dependencies {
 
     // Fragment
     implementation(libs.androidx.fragment.ktx)
+
+    //Webkit
+    implementation(libs.androidx.webkit)
 }
