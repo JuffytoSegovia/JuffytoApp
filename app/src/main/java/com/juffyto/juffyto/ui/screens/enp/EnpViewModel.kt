@@ -19,6 +19,9 @@ class EnpViewModel : ViewModel() {
 
     val questions: List<EnpQuestion> = EnpQuestions.questions
 
+    val currentQuestion: EnpQuestion
+        get() = questions[currentQuestionIndex.value]
+
     fun moveToNextQuestion() {
         if (_currentQuestionIndex.value < questions.size - 1) {
             _currentQuestionIndex.value += 1
@@ -43,6 +46,16 @@ class EnpViewModel : ViewModel() {
         }
     }
 
+    fun isAnswerCorrect(questionIndex: Int): Boolean? {
+        return _userAnswers.value[questionIndex]?.let { selectedAnswer ->
+            selectedAnswer == questions[questionIndex].correctOptionIndex
+        }
+    }
+
+    fun isCurrentQuestionAnswered(): Boolean {
+        return _userAnswers.value.containsKey(_currentQuestionIndex.value)
+    }
+
     fun canMoveToNext(): Boolean {
         return _currentQuestionIndex.value < questions.size - 1
     }
@@ -53,5 +66,12 @@ class EnpViewModel : ViewModel() {
 
     fun getCurrentProgress(): Float {
         return (_currentQuestionIndex.value + 1).toFloat() / questions.size
+    }
+
+    fun resetQuestion() {
+        _showSolution.value = false
+        _userAnswers.value = _userAnswers.value.toMutableMap().apply {
+            remove(_currentQuestionIndex.value)
+        }
     }
 }

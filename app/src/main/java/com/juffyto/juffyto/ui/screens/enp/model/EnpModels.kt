@@ -504,12 +504,12 @@ object EnpQuestions {
                        
                        <!-- Altura máxima -->
                        <line x1="17.5" y1="25" x2="17.5" y2="7" stroke="red" stroke-dasharray="1,1" stroke-width="0.5"/>
-                       <text x="18.5" y="16" font-size="2.5">9m</text>
+                       <text x="18.5" y="13" font-size="2.5">9m</text>
                        
                        <!-- Altura 8m -->
                        <line x1="12" y1="25" x2="12" y2="9" stroke="green" stroke-dasharray="1,1" stroke-width="0.5"/>
                        <line x1="23" y1="25" x2="23" y2="9" stroke="green" stroke-dasharray="1,1" stroke-width="0.5"/>
-                       <text x="13" y="17" font-size="2">8m</text>
+                       <text x="13" y="14" font-size="2">8m</text>
                    </g>
                </svg>
            """.trimIndent()
@@ -933,72 +933,109 @@ object EnpQuestions {
         // Pregunta 17 - Calcule el valor de x
         EnpQuestion(
             id = 17,
-            question = """
-            {
-                Triángulo rectángulo:
-                Cateto 1 = 30
-                Cateto 2 = 30
-                
-                Encuentra el valor de x
-            }
-            """,
+            question = """En el triángulo rectángulo △ABC, con ∠A=90°, ∠B=30° y ∠C=60°, se tiene lo siguiente:
+            • El cateto AC mide 2√3
+            • El cateto AB mide x+2, donde x es la incógnita
+            • El punto D es donde la bisectriz del ángulo ∠C divide al cateto AB
+            • El lado AD mide 2 y el lado BD mide x
+            
+            Determina el valor de x.""",
             options = listOf(
                 "4",
                 "2",
                 "6",
                 "8"
             ),
-            correctOptionIndex = 0, // opción a
-            property = "• Teorema de Pitágoras: a^2 + b^2 = c^2\n" +
-                    "• c = √(a^2 + b^2)\n" +
-                    "• x = c - 2",
+            correctOptionIndex = 0,
+            property = """
+            • La bisectriz de un ángulo divide al ángulo en dos partes iguales
+            • En un triángulo 30-60-90: si el menor cateto es k
+              - Cateto mayor = k√3
+              - Hipotenusa = 2k
+            • En un triángulo isósceles, dos de sus lados son iguales
+            • Este problema puede resolverse por:
+              - Propiedades de triángulos notables (30-60-90)
+              - Teorema de Pitágoras
+              - Proporcionalidad entre triángulos semejantes
+            """.trimIndent(),
             hasFormula = true,
             solutionSteps = listOf(
                 SolutionStep(
                     1,
-                    "Aplicar el Teorema de Pitágoras:",
+                    "Analizar la bisectriz y los triángulos formados:",
                     listOf(
-                        "Cateto 1 = 30",
-                        "Cateto 2 = 30",
-                        "c^2 = 30^2 + 30^2",
-                        "c^2 = 900 + 900",
-                        "c^2 = 1800"
+                        "• La línea que divide al ángulo de 60° es una bisectriz",
+                        "• El triángulo inferior es un 30-60-90",
+                        "• El triángulo superior tiene dos ángulos de 30°, por lo que es isósceles",
+                        "• La bisectriz es hipotenusa del triángulo inferior y lado del superior"
                     )
                 ),
                 SolutionStep(
                     2,
-                    "Calcular el valor de c:",
+                    "Calcular la bisectriz usando el triángulo inferior (30-60-90):",
                     listOf(
-                        "c = √1800",
-                        "c = 2√3"
+                        "• Cateto menor (altura) = 2 = k",
+                        "• Cateto mayor (base) = 2√3 = k√3",
+                        "• Hipotenusa (bisectriz) = 4 = 2k",
+                        "• Se confirma que es un triángulo 30-60-90 válido"
                     )
                 ),
                 SolutionStep(
                     3,
-                    "Hallar el valor de x:",
+                    "Determinar x usando propiedades del triángulo isósceles superior:",
                     listOf(
-                        "x = c - 2",
-                        "x = 2√3 - 2",
-                        "x = 4"
+                        "• Por ser isósceles, dos lados son iguales",
+                        "• Uno de estos lados es x",
+                        "• El otro lado es la bisectriz que ya calculamos (4)",
+                        "• Por lo tanto, x = 4"
+                    )
+                ),
+                SolutionStep(
+                    4,
+                    "Métodos alternativos de solución:",
+                    listOf(
+                        "Por Pitágoras en el triángulo inferior:",
+                        "• h² = 2² + (2√3)² = 4 + 12 = 16",
+                        "• h = 4 (siendo h la bisectriz)",
+                        "Por proporcionalidad:",
+                        "• La razón entre los catetos del triángulo 30-60-90 es 1:√3",
+                        "• Esta misma razón se mantiene en todos los triángulos semejantes"
+                    )
+                ),
+                SolutionStep(
+                    5,
+                    "Verificación:",
+                    listOf(
+                        "• La bisectriz mide 4 (hipotenusa del triángulo inferior)",
+                        "• El triángulo superior es isósceles con x = 4",
+                        "• Se mantienen las proporciones en ambos triángulos",
+                        "• El resultado coincide por los tres métodos"
                     ),
                     isHighlighted = true
                 )
             ),
             svgDiagram = """
-                <svg viewBox="0 0 70 50" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Triángulo rectángulo -->
-                    <path d="M20,40 L50,40 L35,10 Z" fill="none" stroke="black" stroke-width="1"/>
+                <svg viewBox="0 0 75 60" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Triángulo base -->
+                    <path d="M10,45 L60,45 L10,5 Z" fill="none" stroke="black" stroke-width="1.5"/>
                     
-                    <!-- Catetos -->
-                    <line x1="20" y1="40" x2="35" y2="10" stroke="blue" stroke-width="1" stroke-dasharray="2,2"/>
-                    <line x1="35" y1="10" x2="50" y2="40" stroke="blue" stroke-width="1" stroke-dasharray="2,2"/>
+                    <!-- Línea del medio -->
+                    <line x1="10" y1="25" x2="60" y2="45" stroke="black" stroke-width="1.5"/>
                     
-                    <!-- Hipotenusa -->
-                    <line x1="20" y1="40" x2="50" y2="40" stroke="black" stroke-width="1"/>
+                    <!-- Altura vertical -->
+                    <line x1="10" y1="5" x2="10" y2="45" stroke="black" stroke-width="1.5"/>
                     
-                    <!-- Marcador de x -->
-                    <line x1="35" y1="10" x2="35" y2="20" stroke="red" stroke-width="1" stroke-dasharray="2,2"/>
-                    <text x="38" y="18" font-size="4" fill="red">x</text>
+                    <!-- Marca de ángulo recto -->
+                    <path d="M10,45 L15,45 L15,40 L10,40 Z" fill="none" stroke="black" stroke-width="1"/>
+                    
+                    <!-- Ángulos de 30° -->
+                    <text x="35" y="34" font-size="4" fill="blue">30°</text>
+                    <text x="35" y="43" font-size="4" fill="blue">30°</text>
+                    
+                    <!-- Medidas -->
+                    <text x="5" y="18" font-size="5">x</text>
+                    <text x="5" y="35" font-size="5">2</text>
+                    <text x="30" y="53" font-size="5">2√3</text>
                 </svg>
             """.trimIndent()
         ),
@@ -1051,71 +1088,82 @@ object EnpQuestions {
         // Pregunta 19 - Puntos Notables
         EnpQuestion(
             id = 19,
-            question = "En una región, tres pueblos quieren un hospital que esté a la misma distancia entre todos. Se sitúan 3 puntos distantes formando un triángulo. Se desea situar en el centro del triángulo de tal manera que se encuentre a la misma distancia de los 3 puntos, para ello se debe trazar:",
+            question = """En una región, tres pueblos quieren un hospital que esté a la misma distancia entre todos. Se sitúan 3 puntos distantes formando un triángulo. Se desea situar en el centro del triángulo de tal manera que se encuentre a la misma distancia de los 3 puntos, para ello se debe trazar:""",
             options = listOf(
                 "Incentro",
                 "Baricentro",
                 "Circuncentro",
                 "Ortocentro"
             ),
-            correctOptionIndex = 0,  // Incentro
-            property = "Punto donde se intersecan las bisectrices de un triángulo",
-            hasFormula = true,
+            correctOptionIndex = 2,
+            property = "Los puntos notables del triángulo tienen propiedades específicas de equidistancia",
+            hasFormula = false,
             solutionSteps = listOf(
                 SolutionStep(
                     1,
-                    "Características de los centros del triángulo:",
+                    "Analizar el requerimiento:",
                     listOf(
-                        "• Incentro: Punto de intersección de las bisectrices",
-                        "• Baricentro: Punto donde se intersecan las medianas",
-                        "• Circuncentro: Centro de la circunferencia circunscrita",
-                        "• Ortocentro: Punto de intersección de las alturas"
+                        "• Se necesita un punto equidistante de tres puntos fijos",
+                        "• Los tres puntos son los vértices del triángulo",
+                        "• El punto debe estar a igual distancia de cada vértice"
                     )
                 ),
                 SolutionStep(
                     2,
-                    "Propiedades del Incentro:",
+                    "Examinar los puntos notables:",
                     listOf(
-                        "• Equidistante de los lados del triángulo",
-                        "• Es el centro de la circunferencia inscrita",
-                        "• Siempre está dentro del triángulo",
-                        "• Tiene la propiedad única de estar a la misma distancia de los tres lados"
+                        "Incentro: equidistante de los lados",
+                        "Baricentro: centro de gravedad",
+                        "Circuncentro: equidistante de los vértices",
+                        "Ortocentro: intersección de alturas"
                     )
                 ),
                 SolutionStep(
                     3,
-                    "Análisis de la pregunta:",
+                    "El circuncentro es la respuesta porque:",
                     listOf(
-                        "• Se requiere un punto que esté a la misma distancia de los tres vértices",
-                        "• Esta descripción corresponde exactamente al Incentro",
-                        "• El Incentro es el único punto que cumple con este requisito"
+                        "• Es el centro de la circunferencia circunscrita",
+                        "• Esta circunferencia pasa por los tres vértices",
+                        "• Todos los puntos de la circunferencia están a igual distancia del centro"
+                    )
+                ),
+                SolutionStep(
+                    4,
+                    "Por lo tanto:",
+                    listOf(
+                        "El circuncentro es el único punto que garantiza igual distancia a los tres pueblos porque es el centro de la circunferencia que pasa por los tres vértices"
                     ),
                     isHighlighted = true
                 )
             ),
             svgDiagram = """
-                <svg viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Triángulo -->
-                    <polygon points="10,70 90,70 50,10" fill="none" stroke="black" stroke-width="1"/>
-                    
-                    <!-- Vértices -->
-                    <circle cx="10" cy="70" r="2" fill="red"/>
-                    <circle cx="90" cy="70" r="2" fill="red"/>
-                    <circle cx="50" cy="10" r="2" fill="red"/>
-                    
-                    <!-- Bisectrices -->
-                    <line x1="50" y1="10" x2="50" y2="70" stroke="blue" stroke-dasharray="5,5"/>
-                    <line x1="10" y1="70" x2="70" y2="40" stroke="blue" stroke-dasharray="5,5"/>
-                    <line x1="90" y1="70" x2="30" y2="40" stroke="blue" stroke-dasharray="5,5"/>
-                    
-                    <!-- Incentro -->
-                    <circle cx="50" cy="40" r="3" fill="green"/>
-                    
-                    <!-- Etiquetas -->
-                    <text x="10" y="78" font-size="6">A</text>
-                    <text x="90" y="78" font-size="6">B</text>
-                    <text x="50" y="8" font-size="6">C</text>
-                    <text x="52" y="42" font-size="6">Incentro</text>
+                <svg viewBox="0 0 70 50" xmlns="http://www.w3.org/2000/svg">
+                   <!-- Circunferencia circunscrita -->
+                   <circle cx="35" cy="25" r="20" fill="none" stroke="blue" stroke-width="1" stroke-dasharray="2,2"/>
+                   
+                   <!-- Triángulo equilátero -->
+                   <polygon points="35,6 18,36 52,36" fill="none" stroke="black" stroke-width="1"/>
+                   
+                   <!-- Vértices -->
+                   <circle cx="35" cy="6" r="1.5" fill="black"/>
+                   <circle cx="18" cy="36" r="1.5" fill="black"/>
+                   <circle cx="52" cy="36" r="1.5" fill="black"/>
+                   
+                   <!-- Etiquetas de vértices -->
+                   <text x="33" y="4" font-size="4">A</text>
+                   <text x="15" y="40" font-size="4">B</text>
+                   <text x="54" y="40" font-size="4">C</text>
+                   
+                   <!-- Mediatrices -->
+                   <line x1="35" y1="6" x2="35" y2="25" stroke="red" stroke-dasharray="2,2" stroke-width="0.8"/>
+                   <line x1="18" y1="36" x2="35" y2="25" stroke="red" stroke-dasharray="2,2" stroke-width="0.8"/>
+                   <line x1="52" y1="36" x2="35" y2="25" stroke="red" stroke-dasharray="2,2" stroke-width="0.8"/>
+                   
+                   <!-- Circuncentro -->
+                   <circle cx="35" cy="25" r="1.5" fill="red"/>
+                   
+                   <!-- Etiqueta del Circuncentro -->
+                   <text x="37" y="25" font-size="4" fill="black">O</text>
                 </svg>
             """.trimIndent()
         ),
@@ -1123,7 +1171,7 @@ object EnpQuestions {
         // Pregunta 20 - Hexágono Regular
         EnpQuestion(
             id = 20,
-            question = "Pedro, Max y Luis corren en una plaza, la cual tiene la forma de un hexágono. Pedro sigue el camino ABoD, Max ABoED, y Luis ABoCd. ¿Cuál es la alternativa correcta?",
+            question = "Pedro, Max y Luis corren en una plaza, la cual tiene la forma de un hexágono. Pedro sigue el camino ABoD, Max ABoED, y Luis ABoCD. Marque la alternativa correcta.",
             options = listOf(
                 "Max y Luis recorren la misma distancia",
                 "Pedro recorre más que Max",
@@ -1162,30 +1210,54 @@ object EnpQuestions {
                 )
             ),
             svgDiagram = """
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <svg viewBox="0 0 70 50" xmlns="http://www.w3.org/2000/svg">
                     <!-- Hexágono -->
-                    <polygon points="20,90 50,10 80,90 65,90 50,50 35,90" fill="none" stroke="black" stroke-width="1"/>
+                    <polygon points="35,5 55,15 55,35 35,45 15,35 15,15" fill="none" stroke="black" stroke-width="1"/>
                     
-                    <!-- Etiquetas de los vértices -->
-                    <text x="18" y="95" font-size="6">A</text>
-                    <text x="48" y="5" font-size="6">B</text>
-                    <text x="82" y="95" font-size="6">C</text>
-                    <text x="67" y="95" font-size="6">D</text>
-                    <text x="50" y="55" font-size="6">o</text>
-                    <text x="32" y="95" font-size="6">E</text>
+                    <!-- Líneas al centro -->
+                    <line x1="35" y1="5" x2="35" y2="25" stroke="blue" stroke-width="0.8"/>
+                    <line x1="55" y1="15" x2="35" y2="25" stroke="blue" stroke-width="0.8"/>
+                    <line x1="55" y1="35" x2="35" y2="25" stroke="blue" stroke-width="0.8"/>
+                    <line x1="35" y1="45" x2="35" y2="25" stroke="blue" stroke-width="0.8"/>
+                    <line x1="15" y1="35" x2="35" y2="25" stroke="blue" stroke-width="0.8"/>
+                    <line x1="15" y1="15" x2="35" y2="25" stroke="blue" stroke-width="0.8"/>
                     
-                    <!-- Caminos de los personajes -->
-                    <path d="M20,90 L50,10 L80,90" stroke="blue" stroke-width="1" stroke-dasharray="2,2"/>
-                    <path d="M20,90 L50,10 L65,90" stroke="red" stroke-width="1" stroke-dasharray="2,2"/>
-                    <path d="M20,90 L50,50 L80,90" stroke="green" stroke-width="1" stroke-dasharray="2,2"/>
+                    <!-- Punto central -->
+                    <circle cx="35" cy="25" r="1" fill="black"/>
+                    
+                    <!-- Vértices -->
+                    <circle cx="35" cy="5" r="1" fill="black"/>
+                    <circle cx="55" cy="15" r="1" fill="black"/>
+                    <circle cx="55" cy="35" r="1" fill="black"/>
+                    <circle cx="35" cy="45" r="1" fill="black"/>
+                    <circle cx="15" cy="35" r="1" fill="black"/>
+                    <circle cx="15" cy="15" r="1" fill="black"/>
+                    
+                    <!-- Etiquetas -->
+                    <text x="33" y="3" font-size="3">A</text>
+                    <text x="57" y="16" font-size="3">B</text>
+                    <text x="57" y="38" font-size="3">C</text>
+                    <text x="33" y="48" font-size="3">D</text>
+                    <text x="11" y="38" font-size="3">E</text>
+                    <text x="11" y="16" font-size="3">F</text>
+                    <text x="32" y="23" font-size="3">o</text>
+                    
+                    <!-- Marcas de igual longitud (a) -->
+                    <text x="37" y="15" font-size="3" fill="white">a</text>
+                    <text x="45" y="22" font-size="3" fill="white">a</text>
+                    <text x="45" y="33" font-size="3" fill="white">a</text>
+                    <text x="37" y="35" font-size="3" fill="white">a</text>
+                    <text x="25" y="27" font-size="3" fill="white">a</text>
+                    <text x="25" y="19" font-size="3" fill="white">a</text>
+                    <text x="12" y="25" font-size="3" fill="white">a</text>
                 </svg>
             """.trimIndent()
         ),
 
-        //Pregunta 21 - Área del Rombo
+        // Pregunta 21 - Área del rombo
         EnpQuestion(
             id = 21,
-            question = "Un jardín tiene la forma de un rombo, se trazan las sus diagonales formando triángulos de igual medida, si el área de uno de ellos es de 90 m². Calcule el área del jardín.",
+            question = """Un jardín tiene la forma de un rombo, se trazan las sus diagonales formando triángulos de igual medida, si el área de uno de ellos es de 90 m². Calcule el área del jardín.""",
             options = listOf(
                 "360 m²",
                 "180 m²",
@@ -1193,43 +1265,53 @@ object EnpQuestions {
                 "270 m²"
             ),
             correctOptionIndex = 0,
-            property = "Cálculo del área de un rombo dado el área de uno de sus triángulos",
+            property = """
+                • El área de un rombo es igual a (D × d)/2, donde D y d son sus diagonales
+                • Las diagonales del rombo dividen al rombo en cuatro triángulos congruentes
+                • El área total es la suma de las áreas de los cuatro triángulos
+            """.trimIndent(),
             hasFormula = true,
             solutionSteps = listOf(
                 SolutionStep(
                     1,
-                    "Analizar las características del rombo:",
+                    "Analizar la información:",
                     listOf(
-                        "• El rombo está formado por cuatro triángulos iguales",
-                        "• El área de uno de los triángulos es 90 m²"
+                        "• El rombo está dividido en 4 triángulos iguales",
+                        "• Un triángulo mide 90 m²",
+                        "• Los triángulos son congruentes por las propiedades del rombo"
                     )
                 ),
                 SolutionStep(
                     2,
-                    "Calcular el área del rombo:",
+                    "Calcular el área total:",
                     listOf(
-                        "• El área de un triángulo es 1/2 * base * altura",
-                        "• Si el área de un triángulo es 90 m², entonces base * altura = 180 m²",
-                        "• El área del rombo es 4 veces el área de un triángulo",
-                        "• Área del rombo = 4 * 90 m² = 360 m²"
+                        "• Área total = 4 × área de un triángulo",
+                        "• Área total = 4 × 90 m²"
+                    )
+                ),
+                SolutionStep(
+                    3,
+                    "Por lo tanto:",
+                    listOf(
+                        "Área total = 360 m²"
                     ),
                     isHighlighted = true
                 )
             ),
             svgDiagram = """
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <svg viewBox="0 0 70 50" xmlns="http://www.w3.org/2000/svg">
                     <!-- Rombo -->
-                    <polygon points="50,10 90,50 50,90 10,50" fill="none" stroke="black" stroke-width="1"/>
+                    <polygon points="35,6 55,25 35,44 15,25" fill="none" stroke="black" stroke-width="0.8"/>
                     
                     <!-- Diagonales -->
-                    <line x1="10" y1="50" x2="90" y2="50" stroke="blue" stroke-width="1" stroke-dasharray="2,2"/>
-                    <line x1="50" y1="10" x2="50" y2="90" stroke="blue" stroke-width="1" stroke-dasharray="2,2"/>
+                    <line x1="15" y1="25" x2="55" y2="25" stroke="blue" stroke-width="0.6" stroke-dasharray="1.5,1.5"/>
+                    <line x1="35" y1="6" x2="35" y2="44" stroke="blue" stroke-width="0.6" stroke-dasharray="1.5,1.5"/>
                     
                     <!-- Triángulo -->
-                    <polygon points="50,10 90,50 50,50" fill="green" fill-opacity="0.5"/>
+                    <polygon points="35,6 55,25 35,25" fill="#90EE90" fill-opacity="0.5"/>
                     
-                    <!-- Área del triángulo -->
-                    <text x="70" y="35" font-size="6">90 m²</text>
+                    <!-- Área del triángulo centrada perfectamente en el cuadrante verde -->
+                    <text x="36" y="20" font-size="4" fill="black">90 m²</text>
                 </svg>
             """.trimIndent()
         ),
@@ -1238,7 +1320,7 @@ object EnpQuestions {
         EnpQuestion(
             id = 22,
             question = """Una niña quiere construir una casita para su perro usando fierros como estructura y recubrirla con mallas. La casita tendrá forma de un cubo con una pirámide cuadrangular regular en la parte superior.
-            
+
             Datos:
             - Arista del cubo = 2 cm
             - Arista lateral de la pirámide = √5 cm
@@ -1390,7 +1472,7 @@ object EnpQuestions {
                     <path d="M25,25 L65,25" stroke="red" stroke-width="1.5" stroke-dasharray="3,3"/>
                     
                     <!-- Altura -->
-                    <text x="70" y="35" font-size="6">1.2m</text>
+                    <text x="71" y="35" font-size="6">1.2m</text>
                     <path d="M70,15 L70,55" stroke="black" stroke-width="1" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
                     
                     <!-- Flechas -->
@@ -1409,103 +1491,101 @@ object EnpQuestions {
             """.trimIndent()
         ),
 
-        // Pregunta 24 - Descuentos
+        // Pregunta 24 - Descuentos sucesivos
         EnpQuestion(
             id = 24,
-            question = "El precio original de una computadora es 2500. Pedro entró en 2 tiendas donde: La Tienda A ofrecía un descuento de 20% más una promoción de 12% de descuento por aniversario, la tienda B ofrecía un descuento de 26% y si usaba tarjeta un descuento del 5%. ¿En qué tienda debe comprar Pedro?",
+            question = """El precio original de una computadora es 2500. Pedro entró en 2 tiendas donde La Tienda A ofrecía un descuento de 20% más una promoción de 12% de descuento por aniversario, la tienda B ofrecía un descuento de 26% y si usaba tarjeta un descuento del 5% de descuento. ¿En qué tienda debe comprar Pedro?""",
             options = listOf(
-                "La tienda A porque vende a menos precio que la tienda B",
-                "La tienda B porque vende a un menor precio",
+                "La tienda A porque sale a menos precio que la tienda B",
+                "La tienda B porque sale a un menor precio",
                 "La tienda B porque ofrece un descuento sucesivo del 31%",
                 "La tienda A porque ofrece un descuento sucesivo del 32%"
             ),
             correctOptionIndex = 1,
-            property = "Cálculo y comparación de descuentos en diferentes tiendas",
+            property = """
+                • Los descuentos sucesivos se aplican uno después de otro
+                • Primer descuento se aplica al precio original
+                • Segundo descuento se aplica al precio ya rebajado
+                • Los porcentajes de descuento no se suman directamente
+            """.trimIndent(),
             hasFormula = true,
             solutionSteps = listOf(
                 SolutionStep(
                     1,
-                    "Analizar los descuentos en cada tienda:",
+                    "Calcular el precio final en la Tienda A:",
                     listOf(
-                        "• Tienda A: 20% de descuento + 12% de descuento por aniversario",
-                        "• Tienda B: 26% de descuento + 5% de descuento con tarjeta"
+                        "• Precio inicial = 2500",
+                        "• Primer descuento 20%: 2500 × 0.8 = 2000",
+                        "• Segundo descuento 12%: 2000 × 0.88 = 1760"
                     )
                 ),
                 SolutionStep(
                     2,
-                    "Calcular el precio final en cada tienda:",
+                    "Calcular el precio final en la Tienda B:",
                     listOf(
-                        "• Tienda A: Precio original (2500) - 20% - 12% = 1650",
-                        "• Tienda B: Precio original (2500) - 26% - 5% = 1662.5"
+                        "• Precio inicial = 2500",
+                        "• Primer descuento 26%: 2500 × 0.74 = 1850",
+                        "• Segundo descuento 5%: 1850 × 0.95 = 1757.50"
                     )
                 ),
                 SolutionStep(
                     3,
-                    "Conclusión:",
+                    "Comparar precios finales:",
                     listOf(
-                        "• La tienda B ofrece un menor precio final, por lo tanto, la opción correcta es 'b. La tienda B porque vende a un menor precio'"
+                        "• Tienda A: 1760.00",
+                        "• Tienda B: 1757.50",
+                        "• Diferencia: 2.50 más barato en Tienda B"
                     ),
                     isHighlighted = true
                 )
             )
         ),
 
-        // Pregunta 25 - Frecuencias
+        // Pregunta 25 - Tabla de frecuencias
         EnpQuestion(
             id = 25,
-            question = "Se registran los sueldos de empresa DiorDina tu presi, ordena los datos en una tabla de frecuencias.",
+            question = """Se registran los sueldos de empresa DiorDina tu presi, ordena los datos en una tabla de frecuencias.
+            
+            1000-1234-1499-1289-1500-1999-1654-1745-1900-2000-2500-2140-2499-2326-2128-2400-2600-2750-2999-2800""",
             options = listOf(
-                "[1000 - 1500] 4, [1500 - 2000] 5, [2000 - 2500] 6, [2500 - 3000] 5",
-                "[1000 - 1500] 2, [1500 - 2000] 8, [2000 - 2500] 7, [2500 - 3000] 3",
-                "[1000 - 1500] 6, [1500 - 2000] 4, [2000 - 2500] 5, [2500 - 3000] 5",
-                "[1000 - 1500] 3, [1500 - 2000] 6, [2000 - 2500] 8, [2500 - 3000] 3"
+                "[1000-1500] 4, [1500-2000] 5, [2000-2500] 6, [2500-3000] 5",
+                "[1000-1500] 2, [1500-2000] 8, [2000-2500] 7, [2500-3000] 3",
+                "[1000-1500] 6, [1500-2000] 4, [2000-2500] 5, [2500-3000] 5",
+                "[1000-1500] 3, [1500-2000] 6, [2000-2500] 8, [2500-3000] 3"
             ),
             correctOptionIndex = 0,
-            property = "Construcción de una tabla de frecuencias a partir de datos agrupados",
+            property = """
+                • Los intervalos deben ser del mismo tamaño
+                • Cada dato debe pertenecer a un solo intervalo
+                • La frecuencia es el número de datos en cada intervalo
+            """.trimIndent(),
             hasFormula = false,
             solutionSteps = listOf(
                 SolutionStep(
                     1,
-                    "Organizar los datos en intervalos:",
+                    "Organizar los datos en intervalos de 500:",
                     listOf(
-                        "1000 - 1234",
-                        "1234 - 1499",
-                        "1499 - 1289",
-                        "1289 - 1500",
-                        "1500 - 1999",
-                        "1654 - 1745",
-                        "1745 - 1900",
-                        "1900 - 2000",
-                        "2000 - 2500",
-                        "2500 - 2140",
-                        "2140 - 2499",
-                        "2499 - 2326",
-                        "2128 - 2400",
-                        "2400 - 2600",
-                        "2600 - 2750",
-                        "2750 - 2999",
-                        "2999 - 2800"
+                        "• [1000-1500]: 1000, 1234, 1499, 1289",
+                        "• [1500-2000]: 1500, 1999, 1654, 1745, 1900",
+                        "• [2000-2500]: 2000, 2140, 2499, 2326, 2128, 2400",
+                        "• [2500-3000]: 2600, 2750, 2999, 2800, 2500"
                     )
                 ),
                 SolutionStep(
                     2,
-                    "Agrupar los intervalos en rangos de 500:",
+                    "Contar la frecuencia en cada intervalo:",
                     listOf(
-                        "[1000 - 1500] 4",
-                        "[1500 - 2000] 5",
-                        "[2000 - 2500] 6",
-                        "[2500 - 3000] 5"
+                        "• [1000-1500] = 4 datos",
+                        "• [1500-2000] = 5 datos",
+                        "• [2000-2500] = 6 datos",
+                        "• [2500-3000] = 5 datos"
                     )
                 ),
                 SolutionStep(
                     3,
-                    "Construir la tabla de frecuencias:",
+                    "Por lo tanto:",
                     listOf(
-                        "Intervalo    Frecuencia",
-                        "[1000 - 1500]    4",
-                        "[1500 - 2000]    5",
-                        "[2000 - 2500]    6",
-                        "[2500 - 3000]    5"
+                        "[1000-1500] 4, [1500-2000] 5, [2000-2500] 6, [2500-3000] 5"
                     ),
                     isHighlighted = true
                 )
@@ -1515,7 +1595,7 @@ object EnpQuestions {
         // Pregunta 26 - Crecimiento Exponencial
         EnpQuestion(
             id = 26,
-            question = "Al principio, en un recipiente se tiene 120 bacterias. Si 120 * 2^x donde x es el tiempo que transcurre en un periodo de 3 horas, después de 15 horas, Daniela afirma que habrá 120*15 bacterias. ¿Está de acuerdo con la afirmación de Daniela?",
+            question = """Al principio, en un recipiente se tiene 120 bacterias. Si 120 * 2ˣ donde x es el tiempo que transcurre en un periodo de 3 horas. Después de 15 horas, Daniela afirma que habrá 120*15 bacterias. ¿Estás de acuerdo con la afirmación de Daniela?""",
             options = listOf(
                 "Falso, porque a la cantidad inicial se le debe multiplicar por 32",
                 "Verdadero",
@@ -1523,33 +1603,40 @@ object EnpQuestions {
                 "Verdadero"
             ),
             correctOptionIndex = 0,
-            property = "Cálculo de crecimiento exponencial de bacterias",
+            property = """
+               • En crecimiento exponencial: N = N₀ * aˣ
+               • N₀ es la cantidad inicial
+               • a es la razón de crecimiento
+               • x es el número de periodos
+           """.trimIndent(),
             hasFormula = true,
             solutionSteps = listOf(
                 SolutionStep(
                     1,
-                    "Calcular la cantidad de bacterias después de 3 horas:",
+                    "Analizar los datos:",
                     listOf(
-                        "Cantidad inicial: 120 bacterias",
-                        "Tiempo transcurrido: 3 horas",
-                        "Fórmula: 120 * 2^x, donde x es el tiempo en horas",
-                        "Cantidad de bacterias después de 3 horas: 120 * 2^3 = 960 bacterias"
+                        "• Cantidad inicial = 120 bacterias",
+                        "• Periodo = 3 horas",
+                        "• Tiempo total = 15 horas",
+                        "• Por cada periodo se multiplica por 2"
                     )
                 ),
                 SolutionStep(
                     2,
-                    "Verificar la afirmación de Daniela después de 15 horas:",
+                    "Calcular número de periodos en 15 horas:",
                     listOf(
-                        "Daniela afirma que habrá 120 * 15 = 1800 bacterias",
-                        "Cantidad real después de 15 horas: 960 bacterias * 5 (15 horas / 3 horas) = 4800 bacterias",
-                        "La afirmación de Daniela es falsa, la cantidad real es 4800 bacterias"
+                        "• Periodos = 15 ÷ 3 = 5 periodos",
+                        "• En cada periodo la población se multiplica por 2",
+                        "• En 5 periodos: 2⁵ = 32"
                     )
                 ),
                 SolutionStep(
                     3,
                     "Por lo tanto:",
                     listOf(
-                        "La respuesta correcta es: Falso, porque a la cantidad inicial se le debe multiplicar por 32"
+                        "• Cantidad final = 120 * 32",
+                        "• No es 120 * 15 como afirma Daniela",
+                        "• La respuesta correcta es la opción 'a' porque se debe multiplicar por 32"
                     ),
                     isHighlighted = true
                 )
@@ -1561,13 +1648,13 @@ object EnpQuestions {
             id = 27,
             question = """En un torneo de baloncesto, de un equipo, uno de los jugadores sufrió una lesión y el entrenador necesita elegir un suplente para reemplazarlo. El entrenador decidió elegir al jugador que tuviera el mejor promedio de puntos obtenidos en sus anteriores partidos. A continuación, se muestran los puntos obtenidos por los dos jugadores que podrían ser elegidos suplentes:
             
-            | Alex  | 14 | 8  | 12 | 8  | 20 |
+            |  Alex  | 14 |  8  | 12 |  8  | 20 |
             | Dylan | 10 | 12 | 10 | 12 | 20 |
             """,
             options = listOf(
                 "Alex porque anotó dos veces 8 puntos",
                 "Dilan porque anotó dos veces 12 puntos",
-                "Dylan Porque tuvo el promedio máximo",
+                "Dylan porque tuvo el promedio máximo",
                 "Alex porque tuvo el promedio máximo"
             ),
             correctOptionIndex = 2,
@@ -1613,41 +1700,39 @@ object EnpQuestions {
                 "Ortocentro"
             ),
             correctOptionIndex = 0,
-            property = "Baricentro o centro de gravedad: punto de intersección de las medianas de un triángulo",
+            property = """
+                • El baricentro es el punto donde se intersecan las medianas
+                • Las medianas dividen al triángulo en seis partes iguales
+                • Cada mediana divide al triángulo en dos partes de igual área
+                • Las tres medianas dividen al triángulo en seis partes iguales
+            """.trimIndent(),
             hasFormula = true,
             solutionSteps = listOf(
                 SolutionStep(
                     1,
-                    "Analicemos los datos:",
+                    "Analizar los requerimientos:",
                     listOf(
-                        "• Se tienen 3 terrenos de igual área",
-                        "• Unidos forman un triángulo",
-                        "• Debe existir un punto que divida el triángulo en 3 partes iguales"
+                        "• Se necesita dividir el triángulo en 3 partes iguales",
+                        "• Debe ser un punto notable del triángulo",
+                        "• Las áreas deben ser exactamente iguales"
                     )
                 ),
                 SolutionStep(
                     2,
-                    "Propiedades de los puntos notables:",
+                    "Analizar los puntos notables:",
                     listOf(
-                        "• Baricentro: divide cada mediana en razón 2:1",
-                        "• Circuncentro: equidista de los vértices",
-                        "• Incentro: equidista de los lados",
-                        "• Ortocentro: intersección de las alturas"
+                        "• El baricentro divide al triángulo en partes iguales",
+                        "• Las medianas que se cruzan en el baricentro garantizan áreas iguales",
+                        "• Los otros puntos notables no garantizan áreas iguales"
                     )
                 ),
                 SolutionStep(
                     3,
-                    "Analizamos el punto que cumple la condición:",
-                    listOf(
-                        "• El Baricentro divide al triángulo en 6 partes iguales",
-                        "• Al unir dos partes, se forman 3 regiones de igual área",
-                        "• Es el único punto notable que garantiza áreas iguales"
-                    )
-                ),
-                SolutionStep(
-                    4,
                     "Por lo tanto:",
-                    listOf("El Baricentro es el punto que divide al triángulo en tres áreas iguales"),
+                    listOf(
+                        "El baricentro es el único punto notable que garantiza tres áreas iguales",
+                        "Las medianas dividen correctamente los tres terrenos de los hermanos"
+                    ),
                     isHighlighted = true
                 )
             ),
@@ -1661,19 +1746,11 @@ object EnpQuestions {
                     <line x1="20" y1="150" x2="140" y2="85" stroke="gray" stroke-width="1" stroke-dasharray="4,4"/>
                     <line x1="180" y1="150" x2="60" y2="85" stroke="gray" stroke-width="1" stroke-dasharray="4,4"/>
                     
-                    <!-- Baricentro -->
-                    <circle cx="100" cy="85" r="3" fill="red"/>
-                    
-                    <!-- Áreas coloreadas -->
-                    <path d="M100,20 L100,85 L180,150 Z" fill="lightblue" fill-opacity="0.3"/>
-                    <path d="M20,150 L100,85 L100,150 Z" fill="lightgreen" fill-opacity="0.3"/>
-                    <path d="M100,85 L180,150 L100,150 Z" fill="lightpink" fill-opacity="0.3"/>
+                    <!-- Baricentro (ajustado a 2/3 desde el vértice) -->
+                    <circle cx="100" cy="107" r="3" fill="red"/>
                     
                     <!-- Leyenda -->
-                    <text x="85" y="80" font-size="8" fill="red">G</text>
-                    <text x="20" y="170" font-size="6">Área 1</text>
-                    <text x="90" y="170" font-size="6">Área 2</text>
-                    <text x="160" y="170" font-size="6">Área 3</text>
+                    <text x="97" y="102" font-size="8" fill="red">G</text>
                 </svg>
             """.trimIndent()
         ),
@@ -1732,6 +1809,84 @@ object EnpQuestions {
                     isHighlighted = true
                 )
             )
+        ),
+
+        // Pregunta 30 - Volumen del cilindro
+        EnpQuestion(
+            id = 30,
+            question = """Un tanque cilíndrico de agua está lleno hasta la mitad, necesitaban ¾ del tanque lleno para usar. Se sabe que altura del tanque medio lleno era 1.2m con un diámetro de 1 metro. Que se necesita para hallar el volumen de la cantidad de agua que falta para abastecer a una familia""",
+            options = listOf(
+                "Hallar el volumen considerando 0.3 como altura",
+                "Hallar el volumen considerando 0.6 como altura",
+                "Hallar el volumen considerando 1.8 como altura",
+                "Hallar el volumen considerando 1.8 como altura"
+            ),
+            correctOptionIndex = 1,
+            property = """
+                Volumen del cilindro = π × r² × h, donde:
+                • r es el radio (diámetro/2)
+                • h es la altura
+                • Para hallar la diferencia de volumen, se usa Δh
+            """,
+            hasFormula = true,
+            solutionSteps = listOf(
+                SolutionStep(
+                    1,
+                    "Analizar los datos del tanque:",
+                    listOf(
+                        "• Altura actual (mitad) = 1.2m",
+                        "• Diámetro = 1m → radio = 0.5m",
+                        "• Necesitan ¾ del tanque",
+                        "• Actualmente está a ½ del tanque"
+                    )
+                ),
+                SolutionStep(
+                    2,
+                    "Calcular altura faltante:",
+                    listOf(
+                        "• Altura actual = 1.2m (½ del tanque)",
+                        "• Altura requerida = ¾ del tanque",
+                        "• Diferencia = ¾ - ½ = ¼ del tanque",
+                        "• Altura faltante = 0.6m"
+                    )
+                ),
+                SolutionStep(
+                    3,
+                    "Por lo tanto:",
+                    listOf(
+                        "Se debe hallar el volumen usando h = 0.6m como altura",
+                        "Esta es la altura adicional necesaria para llegar a ¾ del tanque"
+                    ),
+                    isHighlighted = true
+                )
+            ),
+            svgDiagram = """
+                <svg viewBox="0 0 70 50" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Cilindro base -->
+                    <ellipse cx="35" cy="40" rx="20" ry="5" fill="none" stroke="black" stroke-width="1"/>
+                    <ellipse cx="35" cy="10" rx="20" ry="5" fill="none" stroke="black" stroke-width="1"/>
+                    <line x1="15" y1="40" x2="15" y2="10" stroke="black" stroke-width="1"/>
+                    <line x1="55" y1="40" x2="55" y2="10" stroke="black" stroke-width="1"/>
+                    
+                    <!-- Nivel actual (mitad) -->
+                    <line x1="15" y1="25" x2="55" y2="25" stroke="blue" stroke-width="1" stroke-dasharray="2,2"/>
+                    <ellipse cx="35" cy="25" rx="20" ry="5" fill="none" stroke="blue" stroke-width="1" stroke-dasharray="2,2"/>
+                    
+                    <!-- Nivel requerido (3/4) -->
+                    <line x1="15" y1="17" x2="55" y2="17" stroke="red" stroke-width="1" stroke-dasharray="2,2"/>
+                    <ellipse cx="35" cy="17" rx="20" ry="5" fill="none" stroke="red" stroke-width="1" stroke-dasharray="2,2"/>
+                    
+                    <!-- Medidas -->
+                    <text x="58" y="26" font-size="3">1.2m</text>
+                    <text x="58" y="18" font-size="3">0.6m</text>
+                    <text x="35" y="48" font-size="3">∅ 1m</text>
+                    
+                    <!-- Leyenda -->
+                    <text x="5" y="26" font-size="3" fill="blue">½</text>
+                    <text x="5" y="18" font-size="3" fill="red">¾</text>
+                </svg>
+            """.trimIndent()
         )
+
     )
 }
