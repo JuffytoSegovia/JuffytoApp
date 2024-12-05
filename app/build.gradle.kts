@@ -21,12 +21,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // Añade esto dentro del bloque android
-    buildFeatures {
-        buildConfig = true  // Habilita BuildConfig
-        compose = true
-    }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -44,6 +38,7 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        buildConfig = true  // Habilita BuildConfig
         compose = true
     }
 }
@@ -89,4 +84,7 @@ dependencies {
 
     //Webkit
     implementation(libs.androidx.webkit)
+
+    //Iconos
+    implementation(libs.androidx.material.icons.extended)
 }
