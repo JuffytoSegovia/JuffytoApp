@@ -16,6 +16,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.juffyto.juffyto.navigation.Screen
 import com.juffyto.juffyto.ui.components.ads.InterstitialAdManager
+import com.juffyto.juffyto.ui.components.ads.RewardedAdManager
+import com.juffyto.juffyto.ui.components.ads.RewardedInterstitialAdManager
 import com.juffyto.juffyto.ui.screens.SplashScreen
 import com.juffyto.juffyto.ui.screens.chronogram.ChronogramScreen
 import com.juffyto.juffyto.ui.screens.chronogram.components.ChronogramViewModel
@@ -36,6 +38,8 @@ class MainActivity : ComponentActivity() {
     private var shouldCheckPermissions = true
     private var hasShownDialog = false
     private lateinit var interstitialAdManager: InterstitialAdManager
+    private lateinit var rewardedAdManager: RewardedAdManager
+    private lateinit var rewardedInterstitialAdManager: RewardedInterstitialAdManager
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -53,6 +57,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // Inicializar el manager de anuncios intersticiales
         interstitialAdManager = InterstitialAdManager(this)
+        rewardedAdManager = RewardedAdManager(this)
+        rewardedInterstitialAdManager = RewardedInterstitialAdManager(this)
         DateUtils.resetToRealTime()
 
         setContent {
@@ -132,7 +138,9 @@ class MainActivity : ComponentActivity() {
                                 interstitialAdManager.showAd(this@MainActivity) {
                                     navController.navigateUp()
                                 }
-                            }
+                            },
+                            rewardedAdManager = rewardedAdManager,
+                            rewardedInterstitialAdManager = rewardedInterstitialAdManager
                         )
                     }
                 }

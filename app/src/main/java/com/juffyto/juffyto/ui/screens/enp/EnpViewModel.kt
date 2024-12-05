@@ -148,5 +148,32 @@ class EnpViewModel : ViewModel() {
             score = null
         )
     }
+
+    private val _unlockedSolutions = MutableStateFlow<Set<Int>>(setOf())
+
+    fun unlockSolution(questionIndex: Int) {
+        _unlockedSolutions.value = _unlockedSolutions.value + questionIndex
+    }
+
+    fun isSolutionUnlocked(questionIndex: Int): Boolean {
+        return _unlockedSolutions.value.contains(questionIndex)
+    }
+
+    private val _isSolutionsUnlocked = MutableStateFlow(false)
+    val isSolutionsUnlocked: StateFlow<Boolean> = _isSolutionsUnlocked.asStateFlow()
+
+    fun unlockSolutions() {
+        _isSolutionsUnlocked.value = true
+    }
+
+    private val _accessUnlocked = MutableStateFlow(false)
+
+    fun unlockAccess() {
+        _accessUnlocked.value = true
+    }
+
+    fun isAccessUnlocked(): Boolean {
+        return _accessUnlocked.value
+    }
 }
 

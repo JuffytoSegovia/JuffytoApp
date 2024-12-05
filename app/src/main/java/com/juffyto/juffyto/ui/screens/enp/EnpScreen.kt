@@ -1,5 +1,7 @@
 package com.juffyto.juffyto.ui.screens.enp
 
+import android.app.Activity
+import android.content.Context
 import android.webkit.WebView
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -19,18 +21,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.juffyto.juffyto.ui.components.ads.AdmobBanner
+import com.juffyto.juffyto.ui.components.ads.RewardedAdManager
+import com.juffyto.juffyto.ui.components.ads.RewardedInterstitialAdManager
 import com.juffyto.juffyto.ui.theme.Primary
 import com.juffyto.juffyto.utils.AdMobConstants
 
 @Composable
 private fun EnpHomeContent(
     onSimulationClick: () -> Unit,
-    onSolutionsClick: () -> Unit
+    onSolutionsClick: () -> Unit,
+    rewardedInterstitialAdManager: RewardedInterstitialAdManager,
+    context: Context,
+    viewModel: EnpViewModel
 ) {
     Column(
         modifier = Modifier
@@ -78,7 +86,16 @@ private fun EnpHomeContent(
 
         // Botón Simulacro
         Button(
-            onClick = onSimulationClick,
+            onClick = {
+                if (viewModel.isAccessUnlocked()) {
+                    onSimulationClick()
+                } else {
+                    rewardedInterstitialAdManager.showAd(context as Activity) {
+                        viewModel.unlockAccess()
+                        onSimulationClick()
+                    }
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             border = BorderStroke(1.dp, Primary),
@@ -101,7 +118,16 @@ private fun EnpHomeContent(
 
         //Botón solucionario
         Button(
-            onClick = onSolutionsClick,
+            onClick = {
+                if (viewModel.isAccessUnlocked()) {
+                    onSolutionsClick()
+                } else {
+                    rewardedInterstitialAdManager.showAd(context as Activity) {
+                        viewModel.unlockAccess()
+                        onSolutionsClick()
+                    }
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             border = BorderStroke(1.dp, Primary),
@@ -121,6 +147,22 @@ private fun EnpHomeContent(
                 )
             }
         }
+
+        // Espacio flexible para empujar el banner al final
+        Spacer(modifier = Modifier.weight(1f))
+
+        //Banner al final
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+        ) {
+            val adUnitId = AdMobConstants.getBannerAdUnitId()
+            AdmobBanner(
+                adUnitId = adUnitId,
+                adSize = AdMobConstants.AdSizes.MEDIUM_BOX
+            )
+        }
     }
 }
 
@@ -128,8 +170,11 @@ private fun EnpHomeContent(
 @Composable
 fun EnpScreen(
     viewModel: EnpViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    rewardedAdManager: RewardedAdManager,
+    rewardedInterstitialAdManager: RewardedInterstitialAdManager
 ) {
+    val context = LocalContext.current
     val enpState by viewModel.enpState.collectAsState()
     val currentQuestionIndex by viewModel.currentQuestionIndex.collectAsState()
     val showSolution by viewModel.showSolution.collectAsState()
@@ -191,11 +236,15 @@ fun EnpScreen(
             )
         }
     ) { paddingValues ->
+
         when (enpState.mode) {
             EnpMode.HOME -> {
                 EnpHomeContent(
                     onSimulationClick = { viewModel.setMode(EnpMode.SIMULATION) },
-                    onSolutionsClick = { viewModel.setMode(EnpMode.SOLUTIONS) }
+                    onSolutionsClick = { viewModel.setMode(EnpMode.SOLUTIONS) },
+                    rewardedInterstitialAdManager = rewardedInterstitialAdManager,
+                    context = context,
+                    viewModel = viewModel  // Pasamos el viewModel
                 )
             }
 
@@ -205,108 +254,129 @@ fun EnpScreen(
                         .fillMaxSize()
                         .padding(paddingValues)
                 ) {
-                    // Contenido principal con scroll
-                    Column(
+                    // Contenido scrolleable
+                    Box(
                         modifier = Modifier
                             .weight(1f)
-                            .verticalScroll(rememberScrollState())
-                            .padding(16.dp)
                     ) {
-                        // Barra de progreso y contador
                         Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            LinearProgressIndicator(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp),
-                                progress = { viewModel.getCurrentProgress() }
-                            )
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    text = "Pregunta ${currentQuestionIndex + 1} de ${viewModel.questions.size}",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                if (enpState.mode == EnpMode.SIMULATION) {
-                                    Text(
-                                        text = "Respondidas: ${simulationAnswers.size} de ${viewModel.questions.size}",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = Primary
-                                    )
-                                }
-                            }
-                        }
-
-                        // Pregunta
-                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surface
-                            )
+                                .verticalScroll(rememberScrollState())
+                                .padding(16.dp)
                         ) {
+                            // Barra de progreso y contador
                             Column(
-                                modifier = Modifier.padding(16.dp)
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Text(
-                                    text = currentQuestion.question,
-                                    style = MaterialTheme.typography.bodyLarge
+                                LinearProgressIndicator(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(8.dp),
+                                    progress = { viewModel.getCurrentProgress() }
                                 )
-                            }
-                        }
 
-                        // Opciones de respuesta
-                        currentQuestion.options.forEachIndexed { index, option ->
-                            val isSelected = when (enpState.mode) {
-                                EnpMode.SIMULATION -> simulationAnswers[currentQuestionIndex] == index
-                                else -> userAnswers[currentQuestionIndex] == index
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Pregunta ${currentQuestionIndex + 1} de ${viewModel.questions.size}",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    if (enpState.mode == EnpMode.SIMULATION) {
+                                        Text(
+                                            text = "Respondidas: ${simulationAnswers.size} de ${viewModel.questions.size}",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = Primary
+                                        )
+                                    }
+                                }
                             }
-                            val isCorrect = showSolution && index == currentQuestion.correctOptionIndex
 
+                            // Pregunta
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                onClick = {
-                                    if (!showSolution) viewModel.selectAnswer(index)
-                                },
+                                    .padding(vertical = 8.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = when {
-                                        isCorrect -> Color(0xFFE8F5E9)
-                                        isSelected -> MaterialTheme.colorScheme.primaryContainer
-                                        else -> MaterialTheme.colorScheme.surface
-                                    }
+                                    containerColor = MaterialTheme.colorScheme.surface
                                 )
                             ) {
-                                Text(
-                                    text = "${('a' + index)}) $option",
-                                    modifier = Modifier.padding(16.dp),
-                                    color = when {
-                                        isCorrect -> Color(0xFF2E7D32)
-                                        isSelected -> MaterialTheme.colorScheme.onPrimaryContainer
-                                        else -> MaterialTheme.colorScheme.onSurface
-                                    }
-                                )
+                                Column(
+                                    modifier = Modifier.padding(16.dp)
+                                ) {
+                                    Text(
+                                        text = currentQuestion.question,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
                             }
-                        }
 
-                        // Botón de solución (solo en modo SOLUTIONS)
-                        if (enpState.mode == EnpMode.SOLUTIONS) {
-                            Button(
-                                onClick = { viewModel.toggleSolution() },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 16.dp)
-                            ) {
-                                Text(if (showSolution) "Ocultar solución" else "Ver solución")
+                            // Opciones de respuesta
+                            currentQuestion.options.forEachIndexed { index, option ->
+                                val isSelected = when (enpState.mode) {
+                                    EnpMode.SIMULATION -> simulationAnswers[currentQuestionIndex] == index
+                                    else -> userAnswers[currentQuestionIndex] == index
+                                }
+                                val isCorrect =
+                                    showSolution && index == currentQuestion.correctOptionIndex
+
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    onClick = {
+                                        if (!showSolution) viewModel.selectAnswer(index)
+                                    },
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = when {
+                                            isCorrect -> Color(0xFFE8F5E9)
+                                            isSelected -> MaterialTheme.colorScheme.primaryContainer
+                                            else -> MaterialTheme.colorScheme.surface
+                                        }
+                                    )
+                                ) {
+                                    Text(
+                                        text = "${('a' + index)}) $option",
+                                        modifier = Modifier.padding(16.dp),
+                                        color = when {
+                                            isCorrect -> Color(0xFF2E7D32)
+                                            isSelected -> MaterialTheme.colorScheme.onPrimaryContainer
+                                            else -> MaterialTheme.colorScheme.onSurface
+                                        }
+                                    )
+                                }
+                            }
+
+                            // Botón de solución (solo en modo SOLUTIONS)
+                            if (enpState.mode == EnpMode.SOLUTIONS) {
+                                Button(
+                                    onClick = {
+                                        if (!showSolution) {
+                                            if (viewModel.isSolutionUnlocked(currentQuestionIndex)) {
+                                                // Si ya está desbloqueada, mostrar directamente
+                                                viewModel.toggleSolution()
+                                            } else {
+                                                // Si no está desbloqueada, mostrar anuncio
+                                                rewardedAdManager.showAd(context as Activity) {
+                                                    viewModel.unlockSolution(currentQuestionIndex)
+                                                    viewModel.toggleSolution()
+                                                }
+                                            }
+                                        } else {
+                                            viewModel.toggleSolution()
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 16.dp)
+                                ) {
+                                    Text(if (showSolution) "Ocultar solución" else "Ver solución")
+                                }
                             }
 
                             if (showSolution) {
@@ -349,7 +419,9 @@ fun EnpScreen(
                                                         .fillMaxWidth()
                                                         .padding(vertical = 4.dp),
                                                     colors = CardDefaults.cardColors(
-                                                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                                                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(
+                                                            alpha = 0.3f
+                                                        )
                                                     )
                                                 ) {
                                                     Text(
@@ -368,7 +440,11 @@ fun EnpScreen(
                                                 style = MaterialTheme.typography.titleMedium,
                                                 fontWeight = FontWeight.Bold,
                                                 color = Primary,
-                                                modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+                                                modifier = Modifier.padding(
+                                                    start = 16.dp,
+                                                    top = 16.dp,
+                                                    bottom = 8.dp
+                                                )
                                             )
                                             Spacer(modifier = Modifier.height(8.dp))
                                             SvgDiagram(svgContent)
@@ -447,66 +523,75 @@ fun EnpScreen(
                 }
             }
         }
-    }
 
-    // Diálogo de resultados del simulacro
-    if (enpState.mode == EnpMode.SIMULATION && enpState.simulationCompleted) {
-        AlertDialog(
-            onDismissRequest = { /* No permitir cerrar al tocar fuera */ },
-            title = { Text("Resultados del Simulacro") },
-            text = {
-                Column {
-                    Text("Respuestas correctas: ${viewModel.getCorrectAnswers()} de 30")
-                    Text("Puntaje final: ${enpState.score} de 60 puntos")
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = { viewModel.setMode(EnpMode.SOLUTIONS) }
-                ) {
-                    Text("Ver solucionario")
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = {
-                        viewModel.resetSimulation()
-                        viewModel.setMode(EnpMode.HOME)
+        // Diálogo de resultados del simulacro
+        if (enpState.mode == EnpMode.SIMULATION && enpState.simulationCompleted) {
+            AlertDialog(
+                onDismissRequest = { /* No permitir cerrar al tocar fuera */ },
+                title = { Text("Resultados del Simulacro") },
+                text = {
+                    Column {
+                        Text("Respuestas correctas: ${viewModel.getCorrectAnswers()} de 30")
+                        Text("Puntaje final: ${enpState.score} de 60 puntos")
                     }
-                ) {
-                    Text("Volver al inicio")
-                }
-            }
-        )
-    }
-
-    // Nuevo diálogo de confirmación de salida
-    val showExitConfirmation by viewModel.showExitConfirmation.collectAsState()
-
-    if (showExitConfirmation && enpState.mode == EnpMode.SIMULATION) {
-        AlertDialog(
-            onDismissRequest = { viewModel.hideExitConfirmation() },
-            title = { Text("¿Estás seguro?") },
-            text = { Text("Si sales ahora perderás tu progreso en el simulacro") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        viewModel.hideExitConfirmation()
-                        viewModel.resetSimulation()
-                        viewModel.setMode(EnpMode.HOME)
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            if (viewModel.isSolutionsUnlocked.value) {
+                                viewModel.setMode(EnpMode.SOLUTIONS)
+                            } else {
+                                rewardedInterstitialAdManager.showAd(context as Activity) {
+                                    viewModel.unlockSolutions()
+                                    viewModel.setMode(EnpMode.SOLUTIONS)
+                                }
+                            }
+                        }
+                    ) {
+                        Text("Ver solucionario")
                     }
-                ) {
-                    Text("Salir")
+                },
+                dismissButton = {
+                    Button(
+                        onClick = {
+                            viewModel.resetSimulation()
+                            viewModel.setMode(EnpMode.HOME)
+                        }
+                    ) {
+                        Text("Volver al inicio")
+                    }
                 }
-            },
-            dismissButton = {
-                Button(
-                    onClick = { viewModel.hideExitConfirmation() }
-                ) {
-                    Text("Continuar simulacro")
+            )
+        }
+
+        // Nuevo diálogo de confirmación de salida
+        val showExitConfirmation by viewModel.showExitConfirmation.collectAsState()
+
+        if (showExitConfirmation && enpState.mode == EnpMode.SIMULATION) {
+            AlertDialog(
+                onDismissRequest = { viewModel.hideExitConfirmation() },
+                title = { Text("¿Estás seguro?") },
+                text = { Text("Si sales ahora perderás tu progreso en el simulacro") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.hideExitConfirmation()
+                            viewModel.resetSimulation()
+                            viewModel.setMode(EnpMode.HOME)
+                        }
+                    ) {
+                        Text("Salir")
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { viewModel.hideExitConfirmation() }
+                    ) {
+                        Text("Continuar simulacro")
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 }
 
