@@ -3,6 +3,7 @@ package com.juffyto.juffyto.ui.components.ads
 import android.app.Activity
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -13,7 +14,9 @@ import com.juffyto.juffyto.utils.AdMobConstants
 
 class RewardedAdManager(private val context: Context) {
     private var rewardedAd: RewardedAd? = null
-    private val adRequestInProgress = mutableMapOf<String, Boolean>()  // Para rastrear cargas por ID
+    private val adRequestInProgress = mutableMapOf<String, Boolean>()
+    private var loadAttempts = 0
+    private val maxAttempts = 3
 
     init {
         loadAd()  // Carga inicial
@@ -48,26 +51,35 @@ class RewardedAdManager(private val context: Context) {
     fun showAd(activity: Activity, onRewarded: () -> Unit) {
         val ad = rewardedAd
         if (ad == null) {
-            loadAd()  // Intentar cargar si no hay anuncio
-            Log.d("RewardedAd", "Anuncio no disponible, intentando cargar uno nuevo")
+            loadAttempts++
+            if (loadAttempts >= maxAttempts) {
+                onRewarded()
+                loadAttempts = 0
+                return
+            }
+            loadAd()
+            Toast.makeText(context, "Cargando, por favor intenta de nuevo", Toast.LENGTH_SHORT).show()
             return
         }
 
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() {
                 rewardedAd = null
-                loadAd()  // Cargar el siguiente anuncio
+                loadAd()
+                loadAttempts = 0 // Reiniciar intentos
             }
 
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
                 Log.e("RewardedAd", "Error al mostrar anuncio: $error")
                 rewardedAd = null
-                loadAd()  // Intentar cargar otro
+                loadAd()
+                loadAttempts = 0
             }
         }
 
         ad.show(activity) { rewardItem ->
-            onRewarded()
+            onRewarded() // Solo se llama si el usuario completa el anuncio
+            loadAttempts = 0
         }
     }
 }

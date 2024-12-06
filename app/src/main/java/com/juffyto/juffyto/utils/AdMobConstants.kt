@@ -4,10 +4,10 @@ import com.google.android.gms.ads.AdSize
 
 object AdMobConstants {
     // IDs de producción
-    private const val BANNER_AD_UNIT_ID = "ca-app-pub-6175076564917081/6545885211"
-    private const val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-6175076564917081/2606640204"
-    private const val REWARDED_AD_UNIT_ID = "ca-app-pub-6175076564917081/ca-app-pub-6175076564917081/8306695038" // Tu ID de producción
-    private const val REWARDED_INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-6175076564917081/ca-app-pub-6175076564917081/2546930450" // Tu ID de producción
+    private const val BANNER_AD_UNIT_ID = "ca-app-pub-6175076564917081/3890989644"
+    private const val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-6175076564917081/8449181754"
+    private const val REWARDED_AD_UNIT_ID = "ca-app-pub-6175076564917081/8806222633" // Tu ID de producción
+    private const val REWARDED_INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-6175076564917081/9245206331" // Tu ID de producción
 
     // IDs de prueba
     const val TEST_BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/6300978111"
