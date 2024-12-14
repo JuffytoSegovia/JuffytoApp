@@ -28,6 +28,7 @@ import com.juffyto.juffyto.utils.DateUtils
 import com.juffyto.juffyto.utils.NotificationSettingsHelper
 import com.juffyto.juffyto.ui.screens.enp.EnpScreen
 import com.juffyto.juffyto.ui.screens.enp.EnpViewModel
+import com.juffyto.juffyto.utils.UpdateManager
 
 class MainActivity : ComponentActivity() {
 
@@ -40,6 +41,15 @@ class MainActivity : ComponentActivity() {
     private lateinit var interstitialAdManager: InterstitialAdManager
     private lateinit var rewardedAdManager: RewardedAdManager
     private lateinit var rewardedInterstitialAdManager: RewardedInterstitialAdManager
+    private lateinit var updateManager: UpdateManager
+
+    private val updateActivityResult = registerForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode != RESULT_OK) {  // Removido Activity.
+            updateManager.checkForUpdates()     // Removido this
+        }
+    }
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -59,6 +69,11 @@ class MainActivity : ComponentActivity() {
         interstitialAdManager = InterstitialAdManager(this)
         rewardedAdManager = RewardedAdManager(this)
         rewardedInterstitialAdManager = RewardedInterstitialAdManager(this)
+
+        updateManager = UpdateManager(this)
+        lifecycle.addObserver(updateManager)
+        updateManager.setActivityResultLauncher(updateActivityResult) // Agregar esta línea
+
         DateUtils.resetToRealTime()
 
         setContent {

@@ -16,7 +16,7 @@ class RewardedInterstitialAdManager(private val context: Context) {
     private var rewardedInterstitialAd: RewardedInterstitialAd? = null
     private val adRequestInProgress = mutableMapOf<String, Boolean>()
     private var loadAttempts = 0
-    private val maxAttempts = 4
+    private val maxAttempts = 2
 
     init {
         loadAd()

@@ -16,7 +16,7 @@ class RewardedAdManager(private val context: Context) {
     private var rewardedAd: RewardedAd? = null
     private val adRequestInProgress = mutableMapOf<String, Boolean>()
     private var loadAttempts = 0
-    private val maxAttempts = 3
+    private val maxAttempts = 2
 
     init {
         loadAd()  // Carga inicial

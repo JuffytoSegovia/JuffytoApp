@@ -17,6 +17,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,6 +32,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.juffyto.juffyto.ui.components.ads.AdmobBanner
 import com.juffyto.juffyto.ui.components.ads.RewardedAdManager
 import com.juffyto.juffyto.ui.components.ads.RewardedInterstitialAdManager
+import com.juffyto.juffyto.ui.components.dialogs.RewardedAdDialog
 import com.juffyto.juffyto.ui.theme.Primary
 import com.juffyto.juffyto.utils.AdMobConstants
 
@@ -40,6 +44,9 @@ private fun EnpHomeContent(
     context: Context,
     viewModel: EnpViewModel
 ) {
+    var showSimulacroDialog by remember { mutableStateOf(false) }
+    var showSolucionarioDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -90,10 +97,7 @@ private fun EnpHomeContent(
                 if (viewModel.isAccessUnlocked()) {
                     onSimulationClick()
                 } else {
-                    rewardedInterstitialAdManager.showAd(context as Activity) {
-                        viewModel.unlockAccess()
-                        onSimulationClick()
-                    }
+                    showSimulacroDialog = true
                 }
             },
             modifier = Modifier.fillMaxWidth(),
@@ -122,10 +126,7 @@ private fun EnpHomeContent(
                 if (viewModel.isAccessUnlocked()) {
                     onSolutionsClick()
                 } else {
-                    rewardedInterstitialAdManager.showAd(context as Activity) {
-                        viewModel.unlockAccess()
-                        onSolutionsClick()
-                    }
+                    showSolucionarioDialog = true
                 }
             },
             modifier = Modifier.fillMaxWidth(),
@@ -163,6 +164,41 @@ private fun EnpHomeContent(
                 adSize = AdMobConstants.AdSizes.MEDIUM_BOX
             )
         }
+
+        // AGREGAR AQUÍ los dos if con los diálogos ↓
+        if (showSimulacroDialog) {
+            RewardedAdDialog(
+                title = "Desbloquear Simulacro",
+                description = "Mira el anuncio completo para acceder al simulacro completo del ENP y pon a prueba tus conocimientos.",
+                onConfirm = {
+                    showSimulacroDialog = false
+                    rewardedInterstitialAdManager.showAd(context as Activity) {
+                        viewModel.unlockAccess()
+                        onSimulationClick()
+                    }
+                },
+                onDismiss = {
+                    showSimulacroDialog = false
+                }
+            )
+        }
+
+        if (showSolucionarioDialog) {
+            RewardedAdDialog(
+                title = "Desbloquear Solucionario",
+                description = "Mira el anuncio completo para acceder al solucionario completo con explicaciones paso a paso.",
+                onConfirm = {
+                    showSolucionarioDialog = false
+                    rewardedInterstitialAdManager.showAd(context as Activity) {
+                        viewModel.unlockAccess()
+                        onSolutionsClick()
+                    }
+                },
+                onDismiss = {
+                    showSolucionarioDialog = false
+                }
+            )
+        }
     }
 }
 
@@ -181,6 +217,7 @@ fun EnpScreen(
     val userAnswers by viewModel.userAnswers.collectAsState()
     val simulationAnswers by viewModel.simulationAnswers.collectAsState()
     val currentQuestion = viewModel.questions[currentQuestionIndex]
+    var showSolutionDialog by remember { mutableStateOf(false) }
 
     // Añadir aquí el BackHandler
     BackHandler {
@@ -361,11 +398,8 @@ fun EnpScreen(
                                                 // Si ya está desbloqueada, mostrar directamente
                                                 viewModel.toggleSolution()
                                             } else {
-                                                // Si no está desbloqueada, mostrar anuncio
-                                                rewardedAdManager.showAd(context as Activity) {
-                                                    viewModel.unlockSolution(currentQuestionIndex)
-                                                    viewModel.toggleSolution()
-                                                }
+                                                // Mostrar diálogo antes del anuncio
+                                                showSolutionDialog = true
                                             }
                                         } else {
                                             viewModel.toggleSolution()
@@ -589,6 +623,24 @@ fun EnpScreen(
                     ) {
                         Text("Continuar simulacro")
                     }
+                }
+            )
+        }
+
+        // AGREGAR AQUÍ el nuevo diálogo de solución ↓
+        if (showSolutionDialog) {
+            RewardedAdDialog(
+                title = "Desbloquear Solución",
+                description = "Mira un breve anuncio para ver la solución detallada de la pregunta ${currentQuestionIndex + 1}, incluyendo el paso a paso y explicación.",
+                onConfirm = {
+                    showSolutionDialog = false
+                    rewardedAdManager.showAd(context as Activity) {
+                        viewModel.unlockSolution(currentQuestionIndex)
+                        viewModel.toggleSolution()
+                    }
+                },
+                onDismiss = {
+                    showSolutionDialog = false
                 }
             )
         }

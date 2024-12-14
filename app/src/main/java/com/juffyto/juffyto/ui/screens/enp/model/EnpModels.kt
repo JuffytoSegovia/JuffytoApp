@@ -641,7 +641,7 @@ object EnpQuestions {
                 "127",
                 "153"
             ),
-            correctOptionIndex = 1,
+            correctOptionIndex = 3,
             property = "Suma de términos de una progresión aritmética: Sn = n(a₁ + aₙ)/2, donde:\n" +
                     "aₙ = a₁ + (n-1)d",
             hasFormula = true,
@@ -672,13 +672,13 @@ object EnpQuestions {
                         "Sₙ = n(a₁ + aₙ)/2",
                         "S₉ = 9(5 + 29)/2",
                         "S₉ = 9(34)/2",
-                        "S₉ = 306/2 = 135"
+                        "S₉ = 306/2 = 153"
                     )
                 ),
                 SolutionStep(
                     4,
                     "Por lo tanto:",
-                    listOf("La suma de los 9 primeros términos es 135"),
+                    listOf("La suma de los 9 primeros términos es 153"),
                     isHighlighted = true
                 )
             )
@@ -878,7 +878,7 @@ object EnpQuestions {
         // Pregunta 16 - Probabilidad
         EnpQuestion(
             id = 16,
-            question = "Una profesora hizo un juego con cartas para que los alumnos aprendieran los números primeros, los números de las cartas eran 2,3,5,7,11,13,17,19 ¿Cuál es la probabilidad de que Juana saque un número primo?",
+            question = "Una profesora hizo un juego con cartas para que los alumnos aprendieran los números primos, los números de las cartas eran 2,3,5,7,11,13,17,19 ¿Cuál es la probabilidad de que Juana saque un número primo?",
             options = listOf(
                 "1/8",
                 "1",
