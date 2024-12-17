@@ -19,6 +19,7 @@ import com.juffyto.juffyto.ui.components.ads.InterstitialAdManager
 import com.juffyto.juffyto.ui.components.ads.RewardedAdManager
 import com.juffyto.juffyto.ui.components.ads.RewardedInterstitialAdManager
 import com.juffyto.juffyto.ui.screens.SplashScreen
+import com.juffyto.juffyto.ui.screens.calculator.CalculatorScreen
 import com.juffyto.juffyto.ui.screens.chronogram.ChronogramScreen
 import com.juffyto.juffyto.ui.screens.chronogram.components.ChronogramViewModel
 import com.juffyto.juffyto.ui.screens.menu.MenuScreen
@@ -111,6 +112,11 @@ class MainActivity : ComponentActivity() {
                                 interstitialAdManager.loadAd()
                                 navController.navigate(Screen.Enp.route)
                             },
+                            onNavigateToCalculator = {
+                                // Precargamos un anuncio al entrar a la calculadora
+                                interstitialAdManager.loadAd()
+                                navController.navigate(Screen.Calculator.route)
+                            },
                             onBackPressed = {
                                 // Mostrar anuncio antes de mostrar diálogo de salida
                                 interstitialAdManager.showAd(this@MainActivity) {
@@ -156,6 +162,16 @@ class MainActivity : ComponentActivity() {
                             },
                             rewardedAdManager = rewardedAdManager,
                             rewardedInterstitialAdManager = rewardedInterstitialAdManager
+                        )
+                    }
+
+                    composable(Screen.Calculator.route) {
+                        CalculatorScreen(
+                            onBackClick = {
+                                interstitialAdManager.showAd(this@MainActivity) {
+                                    navController.navigateUp()
+                                }
+                            }
                         )
                     }
                 }

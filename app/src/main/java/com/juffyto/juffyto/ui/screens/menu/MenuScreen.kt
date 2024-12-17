@@ -22,6 +22,7 @@ import com.juffyto.juffyto.utils.AdMobConstants
 fun MenuScreen(
     onNavigateToChronogram: () -> Unit,
     onNavigateToEnp: () -> Unit,
+    onNavigateToCalculator: () -> Unit,
     onBackPressed: () -> Unit
 ) {
     BackHandler {
@@ -104,6 +105,24 @@ fun MenuScreen(
                     ) {
                         Text(
                             text = "Examen Nacional de Preselección",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    // Botón Calculadora
+                    Button(
+                        onClick = onNavigateToCalculator,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Primary
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text(
+                            text = "Calculadora Beca 18",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
                         )
