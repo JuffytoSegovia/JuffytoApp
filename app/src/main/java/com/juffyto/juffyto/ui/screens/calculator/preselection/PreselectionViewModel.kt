@@ -122,28 +122,46 @@ class PreselectionViewModel : ViewModel() {
 
     // Funciones para actualizar el estado
     fun updateNombre(nombre: String) {
-        _state.value = _state.value.copy(nombre = nombre)
+        val error = validarNombre(nombre)
+        _state.value = _state.value.copy(
+            nombre = nombre,
+            nombreError = error
+        )
     }
 
     fun updateModalidad(modalidad: String) {
-        _state.value = _state.value.copy(modalidad = modalidad)
+        _state.value = _state.value.copy(
+            modalidad = modalidad,
+            mostrarLenguaOriginaria = modalidad == "EIB"
+        )
+        validarPasoActual()
     }
 
     fun updatePuntajeENP(puntaje: String) {
-        _state.value = _state.value.copy(puntajeENP = puntaje)
+        val error = validarPuntajeENP(puntaje)
+        _state.value = _state.value.copy(
+            puntajeENP = puntaje,
+            puntajeENPError = error
+        )
     }
 
     fun updateSISFOH(clasificacion: String) {
         _state.value = _state.value.copy(clasificacionSISFOH = clasificacion)
+        validarPasoActual()
     }
 
     fun updateDepartamento(departamento: String) {
         _state.value = _state.value.copy(departamento = departamento)
+        validarPasoActual()
     }
 
     // Agregar después de la función updateDepartamento
     fun updateLenguaOriginaria(lengua: String) {
-        _state.value = _state.value.copy(lenguaOriginaria = lengua)
+        _state.value = _state.value.copy(
+            lenguaOriginaria = lengua,
+            lenguaOriginariaError = null
+        )
+        validarPasoActual()
     }
 
     fun toggleActividadExtracurricular(actividad: ActividadExtracurricular) {
@@ -170,16 +188,16 @@ class PreselectionViewModel : ViewModel() {
     private fun validarNombre(nombre: String): String? {
         return when {
             nombre.isBlank() -> "El nombre es requerido"
-            nombre.length < 3 -> "El nombre debe tener al menos 3 caracteres"
+            nombre.length < 3 -> "Coloca un nombre válido, mínimo 3 caracteres"
             else -> null
         }
     }
 
     private fun validarPuntajeENP(puntaje: String): String? {
         return try {
-            val valor = puntaje.toInt()
+            val valor = puntaje.toIntOrNull()
             when {
-                valor < 0 -> "El puntaje no puede ser negativo"
+                valor == null -> "Ingrese un número válido"
                 valor > 120 -> "El puntaje no puede ser mayor a 120"
                 valor % 2 != 0 -> "El puntaje debe ser un número par"
                 else -> null
@@ -197,24 +215,46 @@ class PreselectionViewModel : ViewModel() {
         when (state.currentStep) {
             1 -> {
                 val nombreError = validarNombre(state.nombre)
-                val puntajeError = if (state.puntajeENP.isNotEmpty()) validarPuntajeENP(state.puntajeENP) else "El puntaje es requerido"
+                val puntajeError = if (state.puntajeENP.isNotEmpty())
+                    validarPuntajeENP(state.puntajeENP)
+                else
+                    "El puntaje es requerido"
 
                 _state.value = state.copy(
                     nombreError = nombreError,
                     puntajeENPError = puntajeError,
-                    modalidadError = if (state.modalidad.isEmpty()) "Seleccione una modalidad" else null,
-                    sisfohError = if (state.clasificacionSISFOH.isEmpty()) "Seleccione una clasificación" else null,
-                    departamentoError = if (state.departamento.isEmpty()) "Seleccione un departamento" else null,
+                    modalidadError = if (state.modalidad.isEmpty())
+                        "Seleccione una modalidad"
+                    else
+                        null,
+                    sisfohError = if (state.clasificacionSISFOH.isEmpty())
+                        "Seleccione una clasificación"
+                    else
+                        null,
+                    departamentoError = if (state.departamento.isEmpty())
+                        "Seleccione un departamento"
+                    else
+                        null,
                     lenguaOriginariaError = if (state.mostrarLenguaOriginaria && state.lenguaOriginaria.isEmpty())
-                        "Seleccione una lengua originaria" else null
+                        "Seleccione una lengua originaria"
+                    else
+                        null
                 )
 
                 valido = nombreError == null && puntajeError == null &&
-                        state.modalidad.isNotEmpty() && state.clasificacionSISFOH.isNotEmpty() &&
+                        state.modalidad.isNotEmpty() &&
+                        state.clasificacionSISFOH.isNotEmpty() &&
                         state.departamento.isNotEmpty() &&
                         (!state.mostrarLenguaOriginaria || state.lenguaOriginaria.isNotEmpty())
             }
-            // Añadiremos validaciones para los otros pasos después
+            2 -> {
+                // No necesita validación especial, siempre es válido ya que los checkboxes son opcionales
+                valido = true
+            }
+            3 -> {
+                // El paso 3 solo muestra resultados, no necesita validación
+                valido = true
+            }
         }
 
         _state.value = state.copy(habilitarContinuar = valido)
@@ -239,7 +279,6 @@ class PreselectionViewModel : ViewModel() {
     }
 
     // Funciones para calcular puntaje
-    // Reemplazar la función calculateScore actual
     fun calculateScore() {
         val state = _state.value
         var puntajeTotal = 0
@@ -250,8 +289,9 @@ class PreselectionViewModel : ViewModel() {
         // Puntaje SISFOH
         puntajeTotal += calcularPuntajeSISFOH(state.clasificacionSISFOH, state.modalidad)
 
-        // Puntaje por departamento
-        puntajeTotal += DEPARTAMENTOS[state.departamento] ?: 0
+        // Puntaje por tasa de transición (departamento)
+        val departamento = state.departamento.split(" - ").first()
+        puntajeTotal += DEPARTAMENTOS[departamento] ?: 0
 
         // Puntaje actividades extracurriculares (máximo 10 puntos)
         puntajeTotal += calcularPuntajeActividades(state.actividadesExtracurriculares)
@@ -270,23 +310,7 @@ class PreselectionViewModel : ViewModel() {
         )
     }
 
-    // Agregar esta función después del calculateScore
-    fun obtenerDesglosePuntaje(): String {
-        val state = _state.value
-        return buildString {
-            appendLine("✅ Modalidad: ${state.modalidad}")
-            appendLine("✅ ENP: ${state.puntajeENP} puntos")
-            appendLine("✅ SISFOH: ${calcularPuntajeSISFOH(state.clasificacionSISFOH, state.modalidad)} puntos")
-            appendLine("✅ Quintil: ${DEPARTAMENTOS[state.departamento] ?: 0} puntos")
-            appendLine("✅ Actividades extracurriculares: ${calcularPuntajeActividades(state.actividadesExtracurriculares)} puntos")
-            appendLine("✅ Condiciones priorizables: ${calcularPuntajeCondiciones(state.condicionesPriorizables)} puntos")
-            if (state.modalidad == "EIB") {
-                appendLine("✅ Lengua originaria: ${calcularPuntajeLenguaOriginaria(state.lenguaOriginaria)} puntos")
-            }
-        }
-    }
-
-    private fun calcularPuntajeSISFOH(clasificacion: String, modalidad: String): Int {
+    fun calcularPuntajeSISFOH(clasificacion: String, modalidad: String): Int {
         return when {
             clasificacion.contains("extrema") -> 5
             clasificacion.contains("Pobreza (P)") && modalidad != "Ordinaria" -> 2
@@ -294,7 +318,7 @@ class PreselectionViewModel : ViewModel() {
         }
     }
 
-    private fun calcularPuntajeActividades(actividades: Set<ActividadExtracurricular>): Int {
+    fun calcularPuntajeActividades(actividades: Set<ActividadExtracurricular>): Int {
         var puntaje = 0
         for (actividad in actividades) {
             puntaje += when (actividad) {
@@ -307,11 +331,23 @@ class PreselectionViewModel : ViewModel() {
         return minOf(puntaje, 10) // Máximo 10 puntos
     }
 
-    private fun calcularPuntajeCondiciones(condiciones: Set<CondicionPriorizable>): Int {
+    fun isCondicionEnabled(condicion: CondicionPriorizable): Boolean {
+        return when (condicion) {
+            CondicionPriorizable.DESPROTECCION ->
+                _state.value.modalidad == "Protección"
+            CondicionPriorizable.COMUNIDAD_NATIVA ->
+                _state.value.modalidad != "CNA y PA"
+            CondicionPriorizable.ORFANDAD ->
+                _state.value.modalidad != "Protección"
+            else -> true
+        }
+    }
+
+    fun calcularPuntajeCondiciones(condiciones: Set<CondicionPriorizable>): Int {
         return minOf(condiciones.size * 5, 25) // 5 puntos por condición, máximo 25 puntos
     }
 
-    private fun calcularPuntajeLenguaOriginaria(lengua: String): Int {
+    fun calcularPuntajeLenguaOriginaria(lengua: String): Int {
         return when {
             lengua.contains("primera prioridad") -> 10
             lengua.contains("segunda prioridad") -> 5

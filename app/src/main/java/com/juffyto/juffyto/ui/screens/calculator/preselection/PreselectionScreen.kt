@@ -1,21 +1,31 @@
 package com.juffyto.juffyto.ui.screens.calculator.preselection
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.juffyto.juffyto.ui.components.ads.AdmobBanner
 import com.juffyto.juffyto.ui.screens.calculator.preselection.PreselectionViewModel.ActividadExtracurricular
+import com.juffyto.juffyto.ui.screens.calculator.preselection.PreselectionViewModel.Companion.DEPARTAMENTOS
 import com.juffyto.juffyto.ui.screens.calculator.preselection.PreselectionViewModel.CondicionPriorizable
 import com.juffyto.juffyto.ui.screens.calculator.preselection.PreselectionViewModel.PreselectionState
 import com.juffyto.juffyto.utils.AdMobConstants
@@ -125,7 +135,8 @@ private fun StepOne(
             label = { Text("Nombre") },
             modifier = Modifier.fillMaxWidth(),
             isError = state.nombreError != null,
-            supportingText = state.nombreError?.let { { Text(it) } }
+            supportingText = state.nombreError?.let { { Text(it) } },
+            singleLine = true
         )
 
         // Selector de Modalidad
@@ -143,7 +154,7 @@ private fun StepOne(
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedModalidad)
                 },
-                modifier = Modifier.menuAnchor().fillMaxWidth(),
+                modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable, enabled = true).fillMaxWidth(),
                 isError = state.modalidadError != null,
                 supportingText = state.modalidadError?.let { { Text(it) } }
             )
@@ -166,12 +177,16 @@ private fun StepOne(
         // Campo Puntaje ENP
         OutlinedTextField(
             value = state.puntajeENP,
-            onValueChange = { viewModel.updatePuntajeENP(it) },
+            onValueChange = {
+                // Solo permitimos números y validamos antes de actualizar
+                if (it.isEmpty() || it.matches(Regex("^\\d+$"))) { viewModel.updatePuntajeENP(it) }
+            },
             label = { Text("Puntaje ENP (0-120)") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth(),
             isError = state.puntajeENPError != null,
-            supportingText = state.puntajeENPError?.let { { Text(it) } }
+            supportingText = state.puntajeENPError?.let { { Text(it) } },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true
         )
 
         // Selector SISFOH
@@ -189,7 +204,7 @@ private fun StepOne(
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSisfoh)
                 },
-                modifier = Modifier.menuAnchor().fillMaxWidth(),
+                modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable, enabled = true).fillMaxWidth(),
                 isError = state.sisfohError != null,
                 supportingText = state.sisfohError?.let { { Text(it) } }
             )
@@ -216,37 +231,110 @@ private fun StepOne(
 
         // Selector de Departamento
         var expandedDepartamento by remember { mutableStateOf(false) }
-        ExposedDropdownMenuBox(
-            expanded = expandedDepartamento,
-            onExpandedChange = { expandedDepartamento = it },
-            modifier = Modifier.fillMaxWidth()
+        var showQuintilDialog by remember { mutableStateOf(false) }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedTextField(
-                value = state.departamento,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Departamento") },
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDepartamento)
-                },
-                modifier = Modifier.menuAnchor().fillMaxWidth(),
-                isError = state.departamentoError != null,
-                supportingText = state.departamentoError?.let { { Text(it) } }
-            )
-            ExposedDropdownMenu(
+            ExposedDropdownMenuBox(
                 expanded = expandedDepartamento,
-                onDismissRequest = { expandedDepartamento = false }
+                onExpandedChange = { expandedDepartamento = it },
+                modifier = Modifier.weight(1f)
             ) {
-                PreselectionViewModel.DEPARTAMENTOS.keys.forEach { departamento ->
-                    DropdownMenuItem(
-                        text = { Text(departamento) },
-                        onClick = {
-                            viewModel.updateDepartamento(departamento)
-                            expandedDepartamento = false
-                        }
-                    )
+                OutlinedTextField(
+                    value = state.departamento.ifEmpty {
+                        state.departamento
+                    }, // Mostrar el valor completo incluyendo puntos
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Departamento donde culmino la secundaria") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDepartamento)
+                    },
+                    modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable, enabled = true).fillMaxWidth(),
+                    isError = state.departamentoError != null,
+                    supportingText = state.departamentoError?.let { { Text(it) } }
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expandedDepartamento,
+                    onDismissRequest = { expandedDepartamento = false }
+                ) {
+                    DEPARTAMENTOS.forEach { (departamento, puntaje) ->
+                        val textoCompleto = "$departamento - $puntaje puntos"
+                        DropdownMenuItem(
+                            text = { Text(textoCompleto) },
+                            onClick = {
+                                viewModel.updateDepartamento(textoCompleto)  // Pasamos el texto completo
+                                expandedDepartamento = false
+                            }
+                        )
+                    }
                 }
             }
+
+            // Ícono de información
+            IconButton(onClick = { showQuintilDialog = true }) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = "Información sobre quintiles"
+                )
+            }
+        }
+
+        // Diálogo de información
+        if (showQuintilDialog) {
+            AlertDialog(
+                onDismissRequest = { showQuintilDialog = false },
+                title = {
+                    Text(
+                        "📌Información de Tasa de Transición",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Column(
+                        modifier = Modifier.verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            "El puntaje se otorga según el departamento donde el postulante culminó la secundaria:",
+                            fontWeight = FontWeight.Medium
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text("✅Quintil 1 (10 puntos):", fontWeight = FontWeight.Bold)
+                        Text("Amazonas, Ucayali, Ayacucho, Puno, Loreto")
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text("✅Quintil 2 (7 puntos):", fontWeight = FontWeight.Bold)
+                        Text("San Martín, Cusco, Huánuco, Apurímac, Huancavelica")
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text("✅Quintil 3 (5 puntos):", fontWeight = FontWeight.Bold)
+                        Text("Áncash, Tacna, Madre de Dios, Moquegua, Pasco, Cajamarca")
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text("✅Quintil 4 (2 puntos):", fontWeight = FontWeight.Bold)
+                        Text("Arequipa, Piura, Junín, Tumbes")
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text("✅Quintil 5 (0 puntos):", fontWeight = FontWeight.Bold)
+                        Text("Ica, Lambayeque, Lima, La Libertad")
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showQuintilDialog = false }) {
+                        Text("Entendido")
+                    }
+                }
+            )
         }
 
         // Campo de Lengua Originaria (solo para EIB)
@@ -265,7 +353,7 @@ private fun StepOne(
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedLengua)
                     },
-                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable, enabled = true).fillMaxWidth(),
                     isError = state.lenguaOriginariaError != null,
                     supportingText = state.lenguaOriginariaError?.let { { Text(it) } }
                 )
@@ -299,6 +387,19 @@ private fun StepOne(
             enabled = state.habilitarContinuar
         ) {
             Text("Continuar")
+        }
+
+        // Agregar este botón después del botón Continuar en StepOne
+        Button(
+            onClick = { viewModel.resetCalculator() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary
+            )
+        ) {
+            Text("Limpiar Formulario")
         }
     }
 }
@@ -340,28 +441,27 @@ private fun StepTwo(
             ) {
                 // Checkboxes para actividades extracurriculares
                 ActividadExtracurricularCheckbox(
-                    actividad = ActividadExtracurricular.CONCURSO_NACIONAL,
                     checked = state.actividadesExtracurriculares.contains(ActividadExtracurricular.CONCURSO_NACIONAL),
                     onCheckedChange = { viewModel.toggleActividadExtracurricular(ActividadExtracurricular.CONCURSO_NACIONAL) },
-                    label = "Concurso Escolar Nacional (1°, 2º o 3º Puesto) - 5 puntos"
+                    label = "(CE) Concurso Escolar Nacional (1°, 2º o 3º Puesto Etapa Nacional) o Concurso Escolar Internacional - 5 puntos"
                 )
+
                 ActividadExtracurricularCheckbox(
-                    actividad = ActividadExtracurricular.CONCURSO_PARTICIPACION,
                     checked = state.actividadesExtracurriculares.contains(ActividadExtracurricular.CONCURSO_PARTICIPACION),
                     onCheckedChange = { viewModel.toggleActividadExtracurricular(ActividadExtracurricular.CONCURSO_PARTICIPACION) },
-                    label = "Participación en Concurso Nacional - 2 puntos"
+                    label = "(CEP) Participación en la Etapa Nacional de los Concursos Escolares Nacionales - 2 puntos"
                 )
+
                 ActividadExtracurricularCheckbox(
-                    actividad = ActividadExtracurricular.JUEGOS_NACIONALES,
                     checked = state.actividadesExtracurriculares.contains(ActividadExtracurricular.JUEGOS_NACIONALES),
                     onCheckedChange = { viewModel.toggleActividadExtracurricular(ActividadExtracurricular.JUEGOS_NACIONALES) },
-                    label = "Juegos Deportivos Escolares (1°, 2º o 3° puesto) - 5 puntos"
+                    label = "(JD) Juegos Deportivos Escolares (1°, 2º o 3° puesto en Etapa Nacional) - 5 puntos"
                 )
+
                 ActividadExtracurricularCheckbox(
-                    actividad = ActividadExtracurricular.JUEGOS_PARTICIPACION,
                     checked = state.actividadesExtracurriculares.contains(ActividadExtracurricular.JUEGOS_PARTICIPACION),
                     onCheckedChange = { viewModel.toggleActividadExtracurricular(ActividadExtracurricular.JUEGOS_PARTICIPACION) },
-                    label = "Participación en Juegos Deportivos - 2 puntos"
+                    label = "(JDP) Participación en la Etapa Nacional de los Juegos Deportivos Escolares Nacionales - 2 puntos"
                 )
             }
         }
@@ -391,58 +491,66 @@ private fun StepTwo(
             ) {
                 // Checkboxes para condiciones priorizables
                 CondicionPriorizableCheckbox(
-                    condicion = CondicionPriorizable.DISCAPACIDAD,
                     checked = state.condicionesPriorizables.contains(CondicionPriorizable.DISCAPACIDAD),
                     onCheckedChange = { viewModel.toggleCondicionPriorizable(CondicionPriorizable.DISCAPACIDAD) },
-                    label = "Discapacidad - 5 puntos"
+                    label = "(D) Discapacidad - 5 puntos",
+                    enabled = viewModel.isCondicionEnabled(CondicionPriorizable.DISCAPACIDAD)
                 )
+
                 CondicionPriorizableCheckbox(
-                    condicion = CondicionPriorizable.BOMBEROS,
                     checked = state.condicionesPriorizables.contains(CondicionPriorizable.BOMBEROS),
                     onCheckedChange = { viewModel.toggleCondicionPriorizable(CondicionPriorizable.BOMBEROS) },
-                    label = "Bomberos activos e hijos de bomberos - 5 puntos"
+                    label = "(B) Bomberos activos e hijos de bomberos - 5 puntos",
+                    enabled = viewModel.isCondicionEnabled(CondicionPriorizable.BOMBEROS)
                 )
+
                 CondicionPriorizableCheckbox(
-                    condicion = CondicionPriorizable.VOLUNTARIOS,
                     checked = state.condicionesPriorizables.contains(CondicionPriorizable.VOLUNTARIOS),
                     onCheckedChange = { viewModel.toggleCondicionPriorizable(CondicionPriorizable.VOLUNTARIOS) },
-                    label = "Voluntarios reconocidos por el MIMP - 5 puntos"
+                    label = "(V) Voluntarios reconocidos por el MIMP - 5 puntos",
+                    enabled = viewModel.isCondicionEnabled(CondicionPriorizable.VOLUNTARIOS)
                 )
+
                 CondicionPriorizableCheckbox(
-                    condicion = CondicionPriorizable.COMUNIDAD_NATIVA,
                     checked = state.condicionesPriorizables.contains(CondicionPriorizable.COMUNIDAD_NATIVA),
                     onCheckedChange = { viewModel.toggleCondicionPriorizable(CondicionPriorizable.COMUNIDAD_NATIVA) },
-                    label = "Pertenencia a Comunidad Nativa Amazónica o Población Afroperuana - 5 puntos"
+                    label = "(IA) Pertenencia a Comunidad Campesina, Comunidad Nativa Amazónica o Población Afroperuana - 5 puntos",
+                    enabled = viewModel.isCondicionEnabled(CondicionPriorizable.COMUNIDAD_NATIVA)
                 )
+
                 CondicionPriorizableCheckbox(
-                    condicion = CondicionPriorizable.METALES_PESADOS,
                     checked = state.condicionesPriorizables.contains(CondicionPriorizable.METALES_PESADOS),
                     onCheckedChange = { viewModel.toggleCondicionPriorizable(CondicionPriorizable.METALES_PESADOS) },
-                    label = "Población expuesta a metales pesados y otras sustancias químicas - 5 puntos"
+                    label = "(PEM) Población expuesta a metales pesados y otras sustancias químicas - 5 puntos",
+                    enabled = viewModel.isCondicionEnabled(CondicionPriorizable.METALES_PESADOS)
                 )
+
                 CondicionPriorizableCheckbox(
-                    condicion = CondicionPriorizable.POBLACION_BENEFICIARIA,
                     checked = state.condicionesPriorizables.contains(CondicionPriorizable.POBLACION_BENEFICIARIA),
                     onCheckedChange = { viewModel.toggleCondicionPriorizable(CondicionPriorizable.POBLACION_BENEFICIARIA) },
-                    label = "Población beneficiaria (Res. Suprema Nº 264-2022-JUS) - 5 puntos"
+                    label = "(PD) Población beneficiaria (Res. Suprema Nº 264-2022-JUS) - 5 puntos",
+                    enabled = viewModel.isCondicionEnabled(CondicionPriorizable.POBLACION_BENEFICIARIA)
                 )
+
                 CondicionPriorizableCheckbox(
-                    condicion = CondicionPriorizable.ORFANDAD,
                     checked = state.condicionesPriorizables.contains(CondicionPriorizable.ORFANDAD),
                     onCheckedChange = { viewModel.toggleCondicionPriorizable(CondicionPriorizable.ORFANDAD) },
-                    label = "Población beneficiaria de la Ley N° 31405 (orfandad) - 5 puntos"
+                    label = "(OR) Población beneficiaria de la Ley N° 31405 (orfandad) - 5 puntos",
+                    enabled = viewModel.isCondicionEnabled(CondicionPriorizable.ORFANDAD)
                 )
+
                 CondicionPriorizableCheckbox(
-                    condicion = CondicionPriorizable.DESPROTECCION,
                     checked = state.condicionesPriorizables.contains(CondicionPriorizable.DESPROTECCION),
                     onCheckedChange = { viewModel.toggleCondicionPriorizable(CondicionPriorizable.DESPROTECCION) },
-                    label = "Desprotección familiar - 5 puntos"
+                    label = "(DF) Desprotección familiar - 5 puntos",
+                    enabled = viewModel.isCondicionEnabled(CondicionPriorizable.DESPROTECCION)
                 )
+
                 CondicionPriorizableCheckbox(
-                    condicion = CondicionPriorizable.AGENTE_SALUD,
                     checked = state.condicionesPriorizables.contains(CondicionPriorizable.AGENTE_SALUD),
                     onCheckedChange = { viewModel.toggleCondicionPriorizable(CondicionPriorizable.AGENTE_SALUD) },
-                    label = "Agente Comunitario de Salud - 5 puntos"
+                    label = "(ACS) Agente Comunitario de Salud - 5 puntos",
+                    enabled = viewModel.isCondicionEnabled(CondicionPriorizable.AGENTE_SALUD)
                 )
             }
         }
@@ -467,7 +575,7 @@ private fun StepTwo(
                 onClick = onNextClick,
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Siguiente")
+                Text("Calcular Puntaje")
             }
         }
     }
@@ -475,7 +583,6 @@ private fun StepTwo(
 
 @Composable
 private fun ActividadExtracurricularCheckbox(
-    actividad: ActividadExtracurricular,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     label: String
@@ -499,10 +606,10 @@ private fun ActividadExtracurricularCheckbox(
 
 @Composable
 private fun CondicionPriorizableCheckbox(
-    condicion: CondicionPriorizable,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    label: String
+    label: String,
+    enabled: Boolean  // Recibimos enabled como parámetro
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -510,13 +617,18 @@ private fun CondicionPriorizableCheckbox(
     ) {
         Checkbox(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
+            enabled = enabled
         )
         Text(
             text = label,
             modifier = Modifier
                 .padding(start = 8.dp)
-                .weight(1f)
+                .weight(1f),
+            color = if (enabled)
+                MaterialTheme.colorScheme.onSurface
+            else
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
         )
     }
 }
@@ -534,7 +646,7 @@ private fun StepThree(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Encabezado con nombre
+        // Encabezado con nombre - Mejorado el centrado
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
@@ -542,19 +654,24 @@ private fun StepThree(
             )
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally  // Centra el contenido
             ) {
                 Text(
-                    text = "Reporte de Preselección",
+                    text = "Reporte de Preselección para",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center  // Asegura el centrado del texto
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = state.nombre,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    textAlign = TextAlign.Center  // Centra el nombre
                 )
             }
         }
@@ -571,19 +688,24 @@ private fun StepThree(
             )
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
                     text = "Tu puntaje estimado de preselección es:",
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color.White
+                    color = Color.White,
+                    textAlign = TextAlign.Center
                 )
                 Text(
                     text = "${state.puntajeTotal ?: 0} puntos",
                     style = MaterialTheme.typography.displayMedium,
                     color = Color.White,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -604,36 +726,208 @@ private fun StepThree(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
+
+                // Obtenemos el puntaje del departamento y su quintil
+                val departamento = state.departamento.split(" - ").first()
+                val puntajeTasa = DEPARTAMENTOS[departamento] ?: 0
+                val quintil = when (puntajeTasa) {
+                    10 -> "1"
+                    7 -> "2"
+                    5 -> "3"
+                    2 -> "4"
+                    else -> "5"
+                }
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text("✅ Modalidad: ${state.modalidad}")
+                    Text("✅ ENP: ${state.puntajeENP} puntos")
+                    Text("✅ SISFOH: ${viewModel.calcularPuntajeSISFOH(state.clasificacionSISFOH, state.modalidad)} puntos")
+                    Text("✅ Tasa de transición (Quintil $quintil): $puntajeTasa puntos")
+                    Text("✅ Actividades extracurriculares: ${viewModel.calcularPuntajeActividades(state.actividadesExtracurriculares)} puntos")
+                    Text("✅ Condiciones priorizables: ${viewModel.calcularPuntajeCondiciones(state.condicionesPriorizables)} puntos")
+                    if (state.modalidad == "EIB") {
+                        Text("✅ Lengua originaria: ${viewModel.calcularPuntajeLenguaOriginaria(state.lenguaOriginaria)} puntos")
+                    }
+                }
+            }
+        }
+
+        // Card de fórmula
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
-                    text = viewModel.obtenerDesglosePuntaje(),
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "Fórmula de Preselección",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Fórmula específica según la modalidad
+                Text(
+                    text = when (state.modalidad) {
+                        "Ordinaria" ->
+                            "PS = ENP + PE + T + (CE o CEP + JD o JDP)max 10 + (D + B + V + IA + PEM + PD + OR + ACS)max 25"
+                        "CNA y PA" ->
+                            "PS = ENP + (PE o P) + T + (CE o CEP + JD o JDP)max 10 + (D + B + V + PEM + PD + OR + ACS)max 25"
+                        "EIB" ->
+                            "PS = ENP + (PE o P) + T + (CE o CEP + JD o JDP)max 10 + (D + B + V + IA + PEM + PD + OR + ACS)max 25 + LO"
+                        "Protección" ->
+                            "PS = ENP + (PE o P) + T + (CE o CEP + JD o JDP)max 10 + (D + B + V + IA + PEM + PD + ACS)max 25 + DF"
+                        else -> // Para FF. AA., VRAEM, Huallaga y REPARED
+                            "PS = ENP + (PE o P) + T + (CE o CEP + JD o JDP)max 10 + (D + B + V + IA + PEM + PD + OR + ACS)max 25"
+                    },
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontStyle = FontStyle.Italic
+                    ),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
         }
 
-        // Mensaje de recomendación
+        // Puntaje máximo
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Puntaje máximo para la modalidad ${state.modalidad}:",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = if (state.modalidad == "EIB") "180 puntos" else "170 puntos",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
+        // Card del mensaje de ánimo
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = when {
+                            (state.puntajeTotal ?: 0) >= 100 -> Icons.Default.Star
+                            (state.puntajeTotal ?: 0) >= 70 -> Icons.Default.ThumbUp
+                            else -> Icons.Default.Info
+                        },
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Mensaje para ti",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = when {
+                        (state.puntajeTotal ?: 0) >= 100 ->
+                            "¡Felicidades! Tienes grandes posibilidades de ganar la beca. " +
+                                    "Mantén todos tus documentos listos para la siguiente etapa."
+                        (state.puntajeTotal ?: 0) >= 70 ->
+                            "¡Buen esfuerzo! Estás en buen camino para obtener la beca. " +
+                                    "Asegúrate de tener toda tu documentación en orden."
+                        else ->
+                            "Cada punto cuenta. No te desanimes y sigue preparándote. " +
+                                    "Aún puedes mejorar tu puntaje en el ENP y revisar si cumples con más condiciones priorizables."
+                    },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+
+        // Card de la fuente de información
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Información de la calculadora",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 Text(
-                    text = "Recomendación",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    text = "Esta calculadora está basada en los criterios y puntajes establecidos en:",
+                    style = MaterialTheme.typography.bodyMedium
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                val uriHandler = LocalUriHandler.current
                 Text(
-                    text = when {
-                        (state.puntajeTotal ?: 0) >= 100 ->
-                            "¡Felicidades! Tienes altas probabilidades de ser preseleccionado. Mantén tu documentación lista para la siguiente fase."
-                        (state.puntajeTotal ?: 0) >= 70 ->
-                            "Tienes posibilidades de ser preseleccionado. Asegúrate de tener todos tus documentos en orden."
-                        else ->
-                            "Tu puntaje está por debajo del promedio. Considera mejorar tu puntaje en el ENP y verificar si cumples con alguna condición priorizable adicional."
-                    },
+                    text = "Tabla 4: Criterios y puntaje de Preselección - Bases del Concurso Beca 18 - Convocatoria 2025",
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 8.dp)
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable {
+                        uriHandler.openUri("https://cdn.www.gob.pe/uploads/document/file/6938514/5987321-rde-n-113-2024-minedu-vmgi-pronabec.pdf?v=1726261404")
+                    },
+                    textDecoration = TextDecoration.Underline
                 )
             }
         }
