@@ -664,7 +664,7 @@ private fun StepThree(
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center  // Asegura el centrado del texto
+                    textAlign = TextAlign.Center  // Asegura el centrado
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
