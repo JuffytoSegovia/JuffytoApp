@@ -1,13 +1,17 @@
 package com.juffyto.juffyto.ui.screens.calculator.preselection
 
+import android.view.View
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.*
@@ -16,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -28,7 +33,10 @@ import com.juffyto.juffyto.ui.screens.calculator.preselection.PreselectionViewMo
 import com.juffyto.juffyto.ui.screens.calculator.preselection.PreselectionViewModel.Companion.DEPARTAMENTOS
 import com.juffyto.juffyto.ui.screens.calculator.preselection.PreselectionViewModel.CondicionPriorizable
 import com.juffyto.juffyto.ui.screens.calculator.preselection.PreselectionViewModel.PreselectionState
+import com.juffyto.juffyto.ui.screens.calculator.sharing.ShareUtils
 import com.juffyto.juffyto.utils.AdMobConstants
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +45,8 @@ fun PreselectionScreen(
     viewModel: PreselectionViewModel = viewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
 
     BackHandler {
         if (state.currentStep > 1) {
@@ -51,10 +61,47 @@ fun PreselectionScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Calculadora de Preselección",
+                        text = "Preselección",
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Regresar",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                },
+                actions = {
+                    if (state.currentStep == 3) {
+                        val view = LocalView.current
+
+                        IconButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    // Primero hacer scroll al inicio
+                                    scrollState.animateScrollTo(0)
+                                    // Pequeño delay para asegurar que el scroll se completó
+                                    delay(300)
+                                    // Luego compartir
+                                    view.parent?.let { layout ->
+                                        ShareUtils.shareReport(
+                                            preselectionLayout = layout as View
+                                        )
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = "Compartir reporte",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary
@@ -101,7 +148,8 @@ fun PreselectionScreen(
                         state = state,
                         viewModel = viewModel,
                         onBackClick = { viewModel.previousStep() },
-                        onRestartClick = { viewModel.resetCalculator() }
+                        onRestartClick = { viewModel.resetCalculator() },
+                        scrollState = scrollState // Pasar el scrollState
                     )
                 }
             }
@@ -638,12 +686,13 @@ private fun StepThree(
     state: PreselectionState,
     viewModel: PreselectionViewModel,
     onBackClick: () -> Unit,
-    onRestartClick: () -> Unit
+    onRestartClick: () -> Unit,
+    scrollState: ScrollState // Nuevo parámetro
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Encabezado con nombre - Mejorado el centrado
@@ -681,7 +730,7 @@ private fun StepThree(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = when {
-                    (state.puntajeTotal ?: 0) >= 100 -> Color(0xFF4CAF50)
+                    (state.puntajeTotal ?: 0) >= 80 -> Color(0xFF4CAF50)
                     (state.puntajeTotal ?: 0) >= 70 -> Color(0xFFFFA726)
                     else -> Color(0xFFF44336)
                 }
@@ -727,29 +776,8 @@ private fun StepThree(
                     fontWeight = FontWeight.Bold
                 )
 
-                // Obtenemos el puntaje del departamento y su quintil
-                val departamento = state.departamento.split(" - ").first()
-                val puntajeTasa = DEPARTAMENTOS[departamento] ?: 0
-                val quintil = when (puntajeTasa) {
-                    10 -> "1"
-                    7 -> "2"
-                    5 -> "3"
-                    2 -> "4"
-                    else -> "5"
-                }
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text("✅ Modalidad: ${state.modalidad}")
-                    Text("✅ ENP: ${state.puntajeENP} puntos")
-                    Text("✅ SISFOH: ${viewModel.calcularPuntajeSISFOH(state.clasificacionSISFOH, state.modalidad)} puntos")
-                    Text("✅ Tasa de transición (Quintil $quintil): $puntajeTasa puntos")
-                    Text("✅ Actividades extracurriculares: ${viewModel.calcularPuntajeActividades(state.actividadesExtracurriculares)} puntos")
-                    Text("✅ Condiciones priorizables: ${viewModel.calcularPuntajeCondiciones(state.condicionesPriorizables)} puntos")
-                    if (state.modalidad == "EIB") {
-                        Text("✅ Lengua originaria: ${viewModel.calcularPuntajeLenguaOriginaria(state.lenguaOriginaria)} puntos")
-                    }
+                state.desglosePuntaje.split("\n").forEach { line ->
+                    Text(line)
                 }
             }
         }

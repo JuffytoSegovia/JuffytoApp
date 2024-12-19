@@ -5,6 +5,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -15,7 +16,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.juffyto.juffyto.ui.components.ads.AdmobBanner
 import com.juffyto.juffyto.ui.screens.calculator.preselection.PreselectionScreen
+import com.juffyto.juffyto.utils.AdMobConstants
 
 @Composable
 fun CalculatorScreen(
@@ -58,6 +61,15 @@ private fun CalculatorMainScreen(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Regresar",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary
@@ -136,7 +148,47 @@ private fun CalculatorMainScreen(
                 }
             }
 
+            // Espacio flexible para empujar el banner al final
             Spacer(modifier = Modifier.weight(1f))
+
+            //Banner al final
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            ) {
+                val adUnitId = AdMobConstants.getBannerAdUnitId()
+                AdmobBanner(
+                    adUnitId = adUnitId,
+                    adSize = AdMobConstants.AdSizes.SMALL_BANNER
+                )
+            }
+
+            //Banner al final
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            ) {
+                val adUnitId = AdMobConstants.getBannerAdUnitId()
+                AdmobBanner(
+                    adUnitId = adUnitId,
+                    adSize = AdMobConstants.AdSizes.LARGE_BANNER
+                )
+            }
+
+            //Banner al final
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            ) {
+                val adUnitId = AdMobConstants.getBannerAdUnitId()
+                AdmobBanner(
+                    adUnitId = adUnitId,
+                    adSize = AdMobConstants.AdSizes.MEDIUM_BOX
+                )
+            }
         }
     }
 }
