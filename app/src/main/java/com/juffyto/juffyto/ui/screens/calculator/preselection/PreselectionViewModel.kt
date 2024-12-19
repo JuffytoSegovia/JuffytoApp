@@ -38,7 +38,8 @@ class PreselectionViewModel : ViewModel() {
         val currentStep: Int = 1,
         val puntajeTotal: Int? = null,
         val showResults: Boolean = false,
-        val error: String? = null
+        val error: String? = null,
+        val desglosePuntaje: String = ""
     )
 
     enum class ActividadExtracurricular {
@@ -278,34 +279,50 @@ class PreselectionViewModel : ViewModel() {
         }
     }
 
-    // Funciones para calcular puntaje
     fun calculateScore() {
         val state = _state.value
         var puntajeTotal = 0
 
-        // Puntaje ENP
-        puntajeTotal += state.puntajeENP.toIntOrNull() ?: 0
-
-        // Puntaje SISFOH
-        puntajeTotal += calcularPuntajeSISFOH(state.clasificacionSISFOH, state.modalidad)
-
-        // Puntaje por tasa de transición (departamento)
+        // Calcular puntajes individuales
+        val puntajeENP = state.puntajeENP.toIntOrNull() ?: 0
+        val puntajeSISFOH = calcularPuntajeSISFOH(state.clasificacionSISFOH, state.modalidad)
         val departamento = state.departamento.split(" - ").first()
-        puntajeTotal += DEPARTAMENTOS[departamento] ?: 0
+        val puntajeQuintil = DEPARTAMENTOS[departamento] ?: 0
+        val puntajeActividades = calcularPuntajeActividades(state.actividadesExtracurriculares)
+        val puntajePriorizable = calcularPuntajeCondiciones(state.condicionesPriorizables)
+        val puntajeLengua = if (state.modalidad == "EIB") {
+            calcularPuntajeLenguaOriginaria(state.lenguaOriginaria)
+        } else 0
 
-        // Puntaje actividades extracurriculares (máximo 10 puntos)
-        puntajeTotal += calcularPuntajeActividades(state.actividadesExtracurriculares)
+        // Determinar el quintil
+        val quintil = when (puntajeQuintil) {
+            10 -> "1"
+            7 -> "2"
+            5 -> "3"
+            2 -> "4"
+            else -> "5"
+        }
 
-        // Puntaje condiciones priorizables (máximo 25 puntos)
-        puntajeTotal += calcularPuntajeCondiciones(state.condicionesPriorizables)
+        // Sumar todos los puntajes
+        puntajeTotal = puntajeENP + puntajeSISFOH + puntajeQuintil +
+                puntajeActividades + puntajePriorizable + puntajeLengua
 
-        // Puntaje lengua originaria (solo para modalidad EIB)
-        if (state.modalidad == "EIB") {
-            puntajeTotal += calcularPuntajeLenguaOriginaria(state.lenguaOriginaria)
+        // Generar el desglose usando el mismo formato que la UI
+        val desglose = buildString {
+            appendLine("✅ Modalidad: ${state.modalidad}")
+            appendLine("✅ ENP: $puntajeENP puntos")
+            appendLine("✅ SISFOH: $puntajeSISFOH puntos")
+            appendLine("✅ Tasa de transición (Quintil $quintil): $puntajeQuintil puntos")
+            appendLine("✅ Actividades extracurriculares: $puntajeActividades puntos")
+            appendLine("✅ Condiciones priorizables: $puntajePriorizable puntos")
+            if (state.modalidad == "EIB") {
+                appendLine("✅ Lengua originaria: $puntajeLengua puntos")
+            }
         }
 
         _state.value = state.copy(
             puntajeTotal = puntajeTotal,
+            desglosePuntaje = desglose,
             showResults = true
         )
     }

@@ -15,7 +15,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.juffyto.juffyto.ui.components.ads.AdmobBanner
 import com.juffyto.juffyto.ui.screens.calculator.preselection.PreselectionScreen
+import com.juffyto.juffyto.utils.AdMobConstants
 
 @Composable
 fun CalculatorScreen(
@@ -136,7 +138,47 @@ private fun CalculatorMainScreen(
                 }
             }
 
+            // Espacio flexible para empujar el banner al final
             Spacer(modifier = Modifier.weight(1f))
+
+            //Banner al final
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            ) {
+                val adUnitId = AdMobConstants.getBannerAdUnitId()
+                AdmobBanner(
+                    adUnitId = adUnitId,
+                    adSize = AdMobConstants.AdSizes.SMALL_BANNER
+                )
+            }
+
+            //Banner al final
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            ) {
+                val adUnitId = AdMobConstants.getBannerAdUnitId()
+                AdmobBanner(
+                    adUnitId = adUnitId,
+                    adSize = AdMobConstants.AdSizes.LARGE_BANNER
+                )
+            }
+
+            //Banner al final
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            ) {
+                val adUnitId = AdMobConstants.getBannerAdUnitId()
+                AdmobBanner(
+                    adUnitId = adUnitId,
+                    adSize = AdMobConstants.AdSizes.MEDIUM_BOX
+                )
+            }
         }
     }
 }
