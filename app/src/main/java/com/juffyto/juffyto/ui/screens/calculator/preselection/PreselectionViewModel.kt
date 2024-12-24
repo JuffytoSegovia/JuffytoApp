@@ -128,6 +128,7 @@ class PreselectionViewModel : ViewModel() {
             nombre = nombre,
             nombreError = error
         )
+        validarPasoActual()
     }
 
     fun updateModalidad(modalidad: String) {
@@ -144,6 +145,7 @@ class PreselectionViewModel : ViewModel() {
             puntajeENP = puntaje,
             puntajeENPError = error
         )
+        validarPasoActual()
     }
 
     fun updateSISFOH(clasificacion: String) {
@@ -221,28 +223,40 @@ class PreselectionViewModel : ViewModel() {
                 else
                     "El puntaje es requerido"
 
+                // Validar todos los campos y guardar los errores
+                val modalidadError = if (state.modalidad.isEmpty())
+                    "Seleccione una modalidad"
+                else
+                    null
+
+                val sisfohError = if (state.clasificacionSISFOH.isEmpty())
+                    "Seleccione una clasificación"
+                else
+                    null
+
+                val departamentoError = if (state.departamento.isEmpty())
+                    "Seleccione un departamento"
+                else
+                    null
+
+                val lenguaOriginariaError = if (state.mostrarLenguaOriginaria && state.lenguaOriginaria.isEmpty())
+                    "Seleccione una lengua originaria"
+                else
+                    null
+
+                // Actualizar el estado con todos los errores
                 _state.value = state.copy(
                     nombreError = nombreError,
                     puntajeENPError = puntajeError,
-                    modalidadError = if (state.modalidad.isEmpty())
-                        "Seleccione una modalidad"
-                    else
-                        null,
-                    sisfohError = if (state.clasificacionSISFOH.isEmpty())
-                        "Seleccione una clasificación"
-                    else
-                        null,
-                    departamentoError = if (state.departamento.isEmpty())
-                        "Seleccione un departamento"
-                    else
-                        null,
-                    lenguaOriginariaError = if (state.mostrarLenguaOriginaria && state.lenguaOriginaria.isEmpty())
-                        "Seleccione una lengua originaria"
-                    else
-                        null
+                    modalidadError = modalidadError,
+                    sisfohError = sisfohError,
+                    departamentoError = departamentoError,
+                    lenguaOriginariaError = lenguaOriginariaError
                 )
 
-                valido = nombreError == null && puntajeError == null &&
+                // Verificar si todos los campos requeridos están completos y válidos
+                valido = nombreError == null &&
+                        puntajeError == null &&
                         state.modalidad.isNotEmpty() &&
                         state.clasificacionSISFOH.isNotEmpty() &&
                         state.departamento.isNotEmpty() &&
@@ -370,6 +384,18 @@ class PreselectionViewModel : ViewModel() {
             lengua.contains("segunda prioridad") -> 5
             else -> 0
         }
+    }
+
+    fun limpiarActividadesExtracurriculares() {
+        _state.value = _state.value.copy(
+            actividadesExtracurriculares = emptySet()
+        )
+    }
+
+    fun limpiarCondicionesPriorizables() {
+        _state.value = _state.value.copy(
+            condicionesPriorizables = emptySet()
+        )
     }
 
     fun resetCalculator() {

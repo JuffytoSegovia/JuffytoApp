@@ -10,6 +10,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
@@ -465,12 +466,31 @@ private fun StepTwo(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Sección de Actividades Extracurriculares
-        Text(
-            text = "Actividades Extracurriculares",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Actividades Extracurriculares",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            // Botón de limpiar actividades extracurriculares
+            TextButton(
+                onClick = { viewModel.limpiarActividadesExtracurriculares() },
+                contentPadding = PaddingValues(horizontal = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CleaningServices, // o Icons.Outlined.BroomAndDust
+                    contentDescription = "Limpiar selección",
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Limpiar")
+            }
+        }
         Text(
             text = "Máximo 10 puntos en total",
             style = MaterialTheme.typography.bodySmall,
@@ -515,12 +535,32 @@ private fun StepTwo(
         }
 
         // Sección de Condiciones Priorizables
-        Text(
-            text = "Condiciones Priorizables",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 16.dp)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Condiciones Priorizables",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+
+            // Botón de limpiar condiciones priorizables
+            TextButton(
+                onClick = { viewModel.limpiarCondicionesPriorizables() },
+                contentPadding = PaddingValues(horizontal = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CleaningServices,
+                    contentDescription = "Limpiar selección",
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Limpiar")
+            }
+        }
         Text(
             text = "Máximo 25 puntos en total",
             style = MaterialTheme.typography.bodySmall,
@@ -718,9 +758,10 @@ private fun StepThree(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = state.nombre,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimary,
-                    textAlign = TextAlign.Center  // Centra el nombre
+                    textAlign = TextAlign.Center,  // Centra el nombre
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -730,8 +771,8 @@ private fun StepThree(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = when {
-                    (state.puntajeTotal ?: 0) >= 80 -> Color(0xFF4CAF50)
-                    (state.puntajeTotal ?: 0) >= 70 -> Color(0xFFFFA726)
+                    (state.puntajeTotal ?: 0) >= 90 -> Color(0xFF4CAF50)
+                    (state.puntajeTotal ?: 0) >= 80 -> Color(0xFFFFA726)
                     else -> Color(0xFFF44336)
                 }
             )
@@ -751,7 +792,7 @@ private fun StepThree(
                 )
                 Text(
                     text = "${state.puntajeTotal ?: 0} puntos",
-                    style = MaterialTheme.typography.displayMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
