@@ -8,6 +8,7 @@ val PrimaryVariant = Color(0xFF1976D2)   // Azul principal variante
 val Secondary = Color(0xFF2196F3)        // Azul secundario
 val Accent = Color(0xFF64B5F6)          // Azul claro para acentos
 val Tertiary = Color(0xFF90CAF9)        // Azul muy claro
+val ButtonContentLight = Color(0xFFFFFFFF) // Color blanco para texto en botones con fondo Primary
 
 // Modo Claro
 val LightBackground = Color(0xFFF8F9FA)  // Fondo principal claro

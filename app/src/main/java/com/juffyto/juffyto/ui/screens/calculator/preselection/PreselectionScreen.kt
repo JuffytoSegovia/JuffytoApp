@@ -63,7 +63,7 @@ fun PreselectionScreen(
                     Text(
                         text = "Preselección",
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = Color.White
                     )
                 },
                 navigationIcon = {
@@ -71,7 +71,7 @@ fun PreselectionScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = Color.White
                         )
                     }
                 },
@@ -98,7 +98,7 @@ fun PreselectionScreen(
                             Icon(
                                 imageVector = Icons.Default.Share,
                                 contentDescription = "Compartir reporte",
-                                tint = MaterialTheme.colorScheme.onPrimary
+                                tint = Color.White
                             )
                         }
                     }
