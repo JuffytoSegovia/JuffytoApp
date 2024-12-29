@@ -3,9 +3,11 @@ package com.juffyto.juffyto.ui.screens.calculator.preselection
 import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -83,12 +85,9 @@ fun PreselectionScreen(
                         IconButton(
                             onClick = {
                                 coroutineScope.launch {
-                                    // Primero hacer scroll al inicio
-                                    scrollState.animateScrollTo(0)
-                                    // Pequeño delay para asegurar que el scroll se completó
-                                    delay(300)
-                                    // Luego compartir
-                                    view.parent?.let { layout ->
+                                    scrollState.animateScrollTo(0) // Primero hacer scroll al inicio
+                                    delay(300) // Pequeño delay para asegurar que el scroll se completó
+                                    view.parent?.let { layout -> // Luego compartir
                                         ShareUtils.shareReport(
                                             preselectionLayout = layout as View
                                         )
@@ -227,8 +226,7 @@ private fun StepOne(
         OutlinedTextField(
             value = state.puntajeENP,
             onValueChange = {
-                // Solo permitimos números y validamos antes de actualizar
-                if (it.isEmpty() || it.matches(Regex("^\\d+$"))) { viewModel.updatePuntajeENP(it) }
+                if (it.isEmpty() || it.matches(Regex("^\\d+$"))) { viewModel.updatePuntajeENP(it) } // Solo permitimos números y validamos antes de actualizar
             },
             label = { Text("Puntaje ENP (0-120)") },
             modifier = Modifier.fillMaxWidth(),
@@ -997,6 +995,77 @@ private fun StepThree(
                         uriHandler.openUri("https://cdn.www.gob.pe/uploads/document/file/6938514/5987321-rde-n-113-2024-minedu-vmgi-pronabec.pdf?v=1726261404")
                     },
                     textDecoration = TextDecoration.Underline
+                )
+            }
+        }
+
+        // Leyenda de colores
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Interpretación del puntaje",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
+                Row( // Verde - Grandes posibilidades
+                    modifier = Modifier.padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .background(Color(0xFF4CAF50), RoundedCornerShape(4.dp))
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "90+ puntos: Grandes posibilidades de ganar la beca",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                Row( // Naranja - Posibilidades moderadas
+                    modifier = Modifier.padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .background(Color(0xFFFFA726), RoundedCornerShape(4.dp))
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "80-89 puntos: Posibilidades moderadas de ganar la beca",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                Row( // Rojo - Necesita mejorar
+                    modifier = Modifier.padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .background(Color(0xFFF44336), RoundedCornerShape(4.dp))
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Menos de 80 puntos: Se recomienda mejorar el puntaje",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                Text( // Nota adicional
+                    text = "Nota: Estos rangos son referenciales y no garantizan la obtención de la beca.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 12.dp)
                 )
             }
         }

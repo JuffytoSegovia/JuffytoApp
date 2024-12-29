@@ -1,13 +1,40 @@
 package com.juffyto.juffyto.ui.screens.calculator.preselection
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-class PreselectionViewModel : ViewModel() {
+class PreselectionViewModel(application: Application) : AndroidViewModel(application) {
+    private val storage = PreselectionStorage(application)
     private val _state = MutableStateFlow(PreselectionState())
     val state: StateFlow<PreselectionState> = _state.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            storage.getData.collect { data ->
+                _state.value = _state.value.copy(
+                    nombre = data.nombre,
+                    modalidad = data.modalidad,
+                    puntajeENP = data.puntajeENP,
+                    clasificacionSISFOH = data.sisfoh,
+                    departamento = data.departamento,
+                    lenguaOriginaria = data.lenguaOriginaria,
+                    actividadesExtracurriculares = data.actividades.mapNotNull {
+                        try { ActividadExtracurricular.valueOf(it) } catch (_: Exception) { null }
+                    }.toSet(),
+                    condicionesPriorizables = data.condiciones.mapNotNull {
+                        try { CondicionPriorizable.valueOf(it) } catch (_: Exception) { null }
+                    }.toSet(),
+                    mostrarLenguaOriginaria = data.modalidad == "EIB"
+                )
+                validarPasoActual()
+            }
+        }
+    }
 
     data class PreselectionState(
         // Paso 1: Datos básicos
@@ -129,6 +156,7 @@ class PreselectionViewModel : ViewModel() {
             nombreError = error
         )
         validarPasoActual()
+        saveCurrentState()
     }
 
     fun updateModalidad(modalidad: String) {
@@ -137,6 +165,7 @@ class PreselectionViewModel : ViewModel() {
             mostrarLenguaOriginaria = modalidad == "EIB"
         )
         validarPasoActual()
+        saveCurrentState()
     }
 
     fun updatePuntajeENP(puntaje: String) {
@@ -146,25 +175,28 @@ class PreselectionViewModel : ViewModel() {
             puntajeENPError = error
         )
         validarPasoActual()
+        saveCurrentState()
     }
 
     fun updateSISFOH(clasificacion: String) {
         _state.value = _state.value.copy(clasificacionSISFOH = clasificacion)
         validarPasoActual()
+        saveCurrentState()
     }
 
     fun updateDepartamento(departamento: String) {
         _state.value = _state.value.copy(departamento = departamento)
         validarPasoActual()
+        saveCurrentState()
     }
 
-    // Agregar después de la función updateDepartamento
     fun updateLenguaOriginaria(lengua: String) {
         _state.value = _state.value.copy(
             lenguaOriginaria = lengua,
             lenguaOriginariaError = null
         )
         validarPasoActual()
+        saveCurrentState()
     }
 
     fun toggleActividadExtracurricular(actividad: ActividadExtracurricular) {
@@ -175,6 +207,7 @@ class PreselectionViewModel : ViewModel() {
             currentActividades.add(actividad)
         }
         _state.value = _state.value.copy(actividadesExtracurriculares = currentActividades)
+        saveCurrentState()
     }
 
     fun toggleCondicionPriorizable(condicion: CondicionPriorizable) {
@@ -185,6 +218,7 @@ class PreselectionViewModel : ViewModel() {
             currentCondiciones.add(condicion)
         }
         _state.value = _state.value.copy(condicionesPriorizables = currentCondiciones)
+        saveCurrentState()
     }
 
     // Funciones de validación
@@ -262,16 +296,9 @@ class PreselectionViewModel : ViewModel() {
                         state.departamento.isNotEmpty() &&
                         (!state.mostrarLenguaOriginaria || state.lenguaOriginaria.isNotEmpty())
             }
-            2 -> {
-                // No necesita validación especial, siempre es válido ya que los checkboxes son opcionales
-                valido = true
-            }
-            3 -> {
-                // El paso 3 solo muestra resultados, no necesita validación
-                valido = true
-            }
+            2 -> {valido = true} //no necesita validación
+            3 -> {valido = true} // El paso 3 solo muestra resultados, no necesita validación
         }
-
         _state.value = state.copy(habilitarContinuar = valido)
         return valido
     }
@@ -390,15 +417,37 @@ class PreselectionViewModel : ViewModel() {
         _state.value = _state.value.copy(
             actividadesExtracurriculares = emptySet()
         )
+        saveCurrentState()
     }
 
     fun limpiarCondicionesPriorizables() {
         _state.value = _state.value.copy(
             condicionesPriorizables = emptySet()
         )
+        saveCurrentState()
+    }
+
+    private fun saveCurrentState() {
+        viewModelScope.launch {
+            storage.saveData(
+                PreselectionData(
+                    nombre = _state.value.nombre,
+                    modalidad = _state.value.modalidad,
+                    puntajeENP = _state.value.puntajeENP,
+                    sisfoh = _state.value.clasificacionSISFOH,
+                    departamento = _state.value.departamento,
+                    lenguaOriginaria = _state.value.lenguaOriginaria,
+                    actividades = _state.value.actividadesExtracurriculares.map { it.name }.toSet(),
+                    condiciones = _state.value.condicionesPriorizables.map { it.name }.toSet()
+                )
+            )
+        }
     }
 
     fun resetCalculator() {
-        _state.value = PreselectionState()
+        viewModelScope.launch {
+            storage.clearData()
+            _state.value = PreselectionState()
+        }
     }
 }
