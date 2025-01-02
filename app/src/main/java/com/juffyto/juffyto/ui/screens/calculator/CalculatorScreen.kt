@@ -1,6 +1,5 @@
 package com.juffyto.juffyto.ui.screens.calculator
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,17 +12,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.juffyto.juffyto.ui.components.ads.AdmobBanner
+import com.juffyto.juffyto.ui.components.ads.RewardedInterstitialAdManager
 import com.juffyto.juffyto.ui.screens.calculator.preselection.PreselectionScreen
+import com.juffyto.juffyto.ui.screens.calculator.selection.SelectionScreen
 import com.juffyto.juffyto.utils.AdMobConstants
 
 @Composable
 fun CalculatorScreen(
     onBackClick: () -> Unit,
+    rewardedInterstitialAdManager: RewardedInterstitialAdManager,
     viewModel: CalculatorViewModel = viewModel()
 ) {
     val currentScreen = viewModel.currentScreen.collectAsState().value
@@ -31,16 +32,16 @@ fun CalculatorScreen(
     when (currentScreen) {
         CalculatorScreen.MAIN -> CalculatorMainScreen(
             onNavigateToPreselection = { viewModel.showPreselection() },
+            onNavigateToSelection = { viewModel.showSelection() },
             onBackClick = onBackClick
         )
         CalculatorScreen.PRESELECTION -> PreselectionScreen(
             onBackClick = { viewModel.showMain() }
         )
-        CalculatorScreen.SELECTION -> {
-            // Por ahora solo mostraremos un mensaje
-            Toast.makeText(LocalContext.current, "Próximamente", Toast.LENGTH_SHORT).show()
-            viewModel.showMain()
-        }
+        CalculatorScreen.SELECTION -> SelectionScreen(
+            onBackClick = { viewModel.showMain() },
+            rewardedInterstitialAdManager = rewardedInterstitialAdManager
+        )
     }
 }
 
@@ -48,9 +49,9 @@ fun CalculatorScreen(
 @Composable
 private fun CalculatorMainScreen(
     onNavigateToPreselection: () -> Unit,
+    onNavigateToSelection: () -> Unit,
     onBackClick: () -> Unit
 ) {
-    val context = LocalContext.current
     BackHandler { onBackClick() }
 
     Scaffold(
@@ -122,9 +123,7 @@ private fun CalculatorMainScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
-                            Toast.makeText(context, "Disponible próximamente", Toast.LENGTH_SHORT).show()
-                        }
+                        .clickable { onNavigateToSelection() }
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {

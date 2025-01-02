@@ -11,48 +11,57 @@ import java.io.FileOutputStream
 import android.graphics.Canvas
 
 object ShareUtils {
-    fun shareReport(
-        preselectionLayout: View, // Pasamos la vista del reporte
-    ) {
+    // Mantener el méttodo original para preselección
+    fun shareReport(preselectionLayout: View) {
+        captureAndShare(preselectionLayout, "preselección")
+    }
+
+    // Añadir sobrecarga para selección
+    fun shareSelectionReport(selectionLayout: View) {
+        captureAndShare(selectionLayout, "selección")
+    }
+
+    // Méttodo privado que maneja la lógica común
+    private fun captureAndShare(layout: View, type: String) {
         try {
             // Capturar la vista del reporte
             val bitmap = Bitmap.createBitmap(
-                preselectionLayout.width,
-                preselectionLayout.height,
+                layout.width,
+                layout.height,
                 Bitmap.Config.ARGB_8888
             )
             val canvas = Canvas(bitmap)
-            preselectionLayout.draw(canvas)
+            layout.draw(canvas)
 
             // Guardar el bitmap
-            val imagesFolder = File(preselectionLayout.context.cacheDir, "images").apply { mkdirs() }
-            val imageFile = File(imagesFolder, "reporte_preselección.png")
+            val imagesFolder = File(layout.context.cacheDir, "images").apply { mkdirs() }
+            val imageFile = File(imagesFolder, "reporte_${type}.png")
 
             FileOutputStream(imageFile).use { stream ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
             }
 
             val contentUri = FileProvider.getUriForFile(
-                preselectionLayout.context,
-                "${preselectionLayout.context.packageName}.fileprovider",
+                layout.context,
+                "${layout.context.packageName}.fileprovider",
                 imageFile
             )
 
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "image/*"
+                setType("image/*")  // Usando setType en lugar de type =
                 putExtra(Intent.EXTRA_STREAM, contentUri)
                 putExtra(Intent.EXTRA_TEXT, """
-                    Reporte generado con la app "Juffyto"
+                    Reporte de $type generado con la app "Juffyto"
                     Instala la app aquí: https://play.google.com/store/apps/details?id=com.juffyto.juffyto
                 """.trimIndent())
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             }
 
-            preselectionLayout.context.startActivity(Intent.createChooser(shareIntent, "Compartir reporte"))
+            layout.context.startActivity(Intent.createChooser(shareIntent, "Compartir reporte"))
         } catch (e: Exception) {
             Log.e("ShareUtils", "Error al compartir reporte", e)
             Toast.makeText(
-                preselectionLayout.context,
+                layout.context,
                 "No se pudo compartir el reporte",
                 Toast.LENGTH_SHORT
             ).show()

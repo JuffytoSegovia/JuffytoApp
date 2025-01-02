@@ -20,6 +20,7 @@ import com.juffyto.juffyto.ui.components.ads.RewardedAdManager
 import com.juffyto.juffyto.ui.components.ads.RewardedInterstitialAdManager
 import com.juffyto.juffyto.ui.screens.SplashScreen
 import com.juffyto.juffyto.ui.screens.calculator.CalculatorScreen
+import com.juffyto.juffyto.ui.screens.calculator.CalculatorViewModel
 import com.juffyto.juffyto.ui.screens.chronogram.ChronogramScreen
 import com.juffyto.juffyto.ui.screens.chronogram.components.ChronogramViewModel
 import com.juffyto.juffyto.ui.screens.menu.MenuScreen
@@ -166,12 +167,17 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable(Screen.Calculator.route) {
+                        val calculatorViewModel: CalculatorViewModel = viewModel(
+                            factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+                        )
                         CalculatorScreen(
+                            viewModel = calculatorViewModel,
                             onBackClick = {
                                 interstitialAdManager.showAd(this@MainActivity) {
                                     navController.navigateUp()
                                 }
-                            }
+                            },
+                            rewardedInterstitialAdManager = rewardedInterstitialAdManager
                         )
                     }
                 }

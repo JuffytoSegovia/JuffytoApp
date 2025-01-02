@@ -15,8 +15,8 @@ android {
         applicationId = "com.juffyto.juffyto"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.1"
+        versionCode = 6
+        versionName = "1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -91,4 +91,7 @@ dependencies {
     //Updates
     implementation(libs.app.update)
     implementation(libs.app.update.ktx)
+
+    //Gson
+    implementation(libs.gson)
 }
