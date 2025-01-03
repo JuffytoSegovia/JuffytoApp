@@ -187,10 +187,7 @@ private fun SelectionForm(
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedModalidad)
                 },
-                modifier = Modifier.menuAnchor(
-                    type = MenuAnchorType.PrimaryNotEditable,
-                    enabled = true
-                ).fillMaxWidth(),
+                modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable, enabled = true).fillMaxWidth(),
                 isError = state.modalidadError != null,
                 supportingText = state.modalidadError?.let { { Text(it) } }
             )
@@ -246,10 +243,7 @@ private fun SelectionForm(
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedRegion)
                 },
-                modifier = Modifier.menuAnchor(
-                    type = MenuAnchorType.PrimaryNotEditable,
-                    enabled = true
-                ).fillMaxWidth(),
+                modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable, enabled = true).fillMaxWidth(),
                 isError = state.regionIESError != null,
                 supportingText = state.regionIESError?.let { { Text(it) } }
             )
@@ -300,10 +294,7 @@ private fun SelectionForm(
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedIES)
                         },
-                        modifier = Modifier.menuAnchor(
-                            type = MenuAnchorType.PrimaryNotEditable,
-                            enabled = true
-                        ).fillMaxWidth(),
+                        modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable, enabled = true).fillMaxWidth(),
                         isError = state.iesError != null,
                         supportingText = state.iesError?.let { { Text(it) } }
                     )

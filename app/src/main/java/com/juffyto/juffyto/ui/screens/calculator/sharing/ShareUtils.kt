@@ -12,7 +12,7 @@ import android.graphics.Canvas
 
 object ShareUtils {
     // Mantener el méttodo original para preselección
-    fun shareReport(preselectionLayout: View) {
+    fun sharePreselectionReport(preselectionLayout: View) {
         captureAndShare(preselectionLayout, "preselección")
     }
 

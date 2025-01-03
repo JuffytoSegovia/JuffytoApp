@@ -36,7 +36,8 @@ fun CalculatorScreen(
             onBackClick = onBackClick
         )
         CalculatorScreen.PRESELECTION -> PreselectionScreen(
-            onBackClick = { viewModel.showMain() }
+            onBackClick = { viewModel.showMain() },
+            rewardedInterstitialAdManager = rewardedInterstitialAdManager
         )
         CalculatorScreen.SELECTION -> SelectionScreen(
             onBackClick = { viewModel.showMain() },
