@@ -87,38 +87,38 @@ class ChronogramViewModel(application: Application) : AndroidViewModel(applicati
                 ),
                 Phase(
                     title = "Subsanación de expedientes",
-                    startDate = LocalDate.parse("21/02/2025", formatter),
-                    endDate = LocalDate.parse("10/03/2025", formatter),
+                    startDate = LocalDate.parse("18/02/2025", formatter),
+                    endDate = LocalDate.parse("07/03/2025", formatter),
                     singleDate = null
                 ),
                 Phase(
                     title = "Validación de expedientes",
-                    startDate = LocalDate.parse("21/02/2025", formatter),
-                    endDate = LocalDate.parse("17/03/2025", formatter),
+                    startDate = LocalDate.parse("18/02/2025", formatter),
+                    endDate = LocalDate.parse("14/03/2025", formatter),
                     singleDate = null
                 ),
                 Phase(
                     title = "Fase de Asignación de puntajes y Selección",
-                    startDate = LocalDate.parse("18/03/2025", formatter),
-                    endDate = LocalDate.parse("21/03/2025", formatter),
+                    startDate = LocalDate.parse("17/03/2025", formatter),
+                    endDate = LocalDate.parse("20/03/2025", formatter),
                     singleDate = null
                 ),
                 Phase(
                     title = "Publicación de Seleccionados",
                     startDate = null,
                     endDate = null,
-                    singleDate = LocalDate.parse("24/03/2025", formatter)
+                    singleDate = LocalDate.parse("21/03/2025", formatter)
                 ),
                 Phase(
                     title = "Fase de Aceptación de la Beca",
-                    startDate = LocalDate.parse("25/03/2025", formatter),
-                    endDate = LocalDate.parse("02/04/2025", formatter),
+                    startDate = LocalDate.parse("22/03/2025", formatter),
+                    endDate = LocalDate.parse("30/03/2025", formatter),
                     singleDate = null
                 ),
                 Phase(
                     title = "Publicación de Lista de Becarios",
-                    startDate = LocalDate.parse("28/03/2025", formatter),
-                    endDate = LocalDate.parse("28/04/2025", formatter),  // Un mes después
+                    startDate = LocalDate.parse("25/03/2025", formatter),
+                    endDate = LocalDate.parse("25/04/2025", formatter),  // Un mes después
                     singleDate = null
                 )
             )
